@@ -1,0 +1,1 @@
+export type Section = "home" | "leads" | "team" | "tools" | "settings";

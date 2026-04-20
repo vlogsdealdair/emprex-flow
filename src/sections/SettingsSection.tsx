@@ -1,0 +1,1 @@
+export { SettingsSection as default } from "./sections";

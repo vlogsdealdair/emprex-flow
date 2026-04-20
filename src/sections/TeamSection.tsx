@@ -1,0 +1,1 @@
+export { TeamSection as default } from "./sections";
