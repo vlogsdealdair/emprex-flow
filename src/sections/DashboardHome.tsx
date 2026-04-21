@@ -8,22 +8,6 @@ import { formatCurrency } from "@/utils/formatters";
 
 interface Props { isAdmin: boolean; onNavigate: (s: any) => void; }
 
-const WIDTH_CLASSES: Record<number,string> = {
-  0: "w-0",
-  10: "w-[10%]",
-  20: "w-[20%]",
-  30: "w-[30%]",
-  40: "w-[40%]",
-  50: "w-[50%]",
-  60: "w-[60%]",
-  70: "w-[70%]",
-  80: "w-[80%]",
-  90: "w-[90%]",
-  100: "w-[100%]",
-};
-
-const percentWidth = (value: number) => WIDTH_CLASSES[Math.min(100, Math.max(0, Math.round(value / 10) * 10))] || "w-full";
-
 function KPI({ label, value, sub, icon: Icon, color, loading }: any) {
   return (
     <div className={`relative bg-slate-900 border rounded-2xl p-5 overflow-hidden hover:border-slate-600 transition-all duration-300 group ${color.border}`}>
@@ -126,7 +110,7 @@ export default function DashboardHome({ isAdmin, onNavigate }: Props) {
                       <span className="text-xs text-slate-500 font-mono">{count} lead{count!==1?"s":""}</span>
                     </div>
                     <div className="h-2 bg-slate-800 rounded-full overflow-hidden">
-                      <div className={`h-full rounded-full transition-all duration-700 ${colors[i%colors.length]} ${percentWidth(pct)}`} />
+                      <div className={`h-full rounded-full transition-all duration-700 ${colors[i%colors.length]}`} style={{width: `${pct}%`}} />
                     </div>
                   </div>
                 );
@@ -142,7 +126,7 @@ export default function DashboardHome({ isAdmin, onNavigate }: Props) {
                 <span className="text-xs font-mono font-bold text-emerald-400">{conv}%</span>
               </div>
               <div className="h-3 bg-slate-800 rounded-full overflow-hidden flex">
-                <div className={`bg-emerald-500 h-full transition-all duration-700 ${percentWidth(Math.round(Number(conv)))}`} />
+                <div className="bg-emerald-500 h-full transition-all duration-700" style={{width: `${Math.round(Number(conv))}%`}} />
                 <div className="bg-amber-500/60 h-full flex-1" />
               </div>
               <div className="flex justify-between mt-1.5">
