@@ -28,20 +28,6 @@ const SVC: Record<string,string> = {
   "Vlog Growth Specialist": "text-emerald-400",
 };
 
-const WIDTH_CLASSES: Record<number,string> = {
-  0: "w-0",
-  10: "w-[10%]",
-  20: "w-[20%]",
-  30: "w-[30%]",
-  40: "w-[40%]",
-  50: "w-[50%]",
-  60: "w-[60%]",
-  70: "w-[70%]",
-  80: "w-[80%]",
-  90: "w-[90%]",
-  100: "w-[100%]",
-};
-
 const SKELETON_WIDTHS = ["w-16", "w-20", "w-24", "w-28", "w-32", "w-36"];
 
 interface Props { isAdmin: boolean; userEmail: string; }
