@@ -58,7 +58,7 @@ export function TeamSection() {
       ) : (
         <div className="grid md:grid-cols-2 gap-4">
           {ranking.map(([name, s], i) => {
-            const conv = s.total > 0 ? ((s.cerrados/s.total)*100).toFixed(0) : "0";
+            const conv = s.total > 0 ? +((s.cerrados/s.total)*100).toFixed(0) : 0;
             const topSvc = Object.entries(s.servicios).sort((a,b)=>b[1]-a[1])[0]?.[0] ?? "—";
             return (
               <div key={name} className={`bg-slate-900 border rounded-2xl p-5 hover:border-slate-700 transition-all ${i < 3 ? medalBg[i] : "border-slate-800"}`}>

@@ -42,7 +42,6 @@ const WIDTH_CLASSES: Record<number,string> = {
   100: "w-[100%]",
 };
 
-const percentWidth = (value: number) => WIDTH_CLASSES[Math.min(100, Math.max(0, Math.round(value / 10) * 10))] || "w-full";
 const SKELETON_WIDTHS = ["w-16", "w-20", "w-24", "w-28", "w-32", "w-36"];
 
 interface Props { isAdmin: boolean; userEmail: string; }
