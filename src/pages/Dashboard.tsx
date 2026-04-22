@@ -140,9 +140,3 @@ export default function Dashboard() {
     </div>
   );
 }
-          {section === "settings" && <SettingsSection />}
-        </main>
-      </div>
-    </div>
-  );
-}
