@@ -1,8 +1,8 @@
-﻿// src/sections/sections.tsx â€” Team + Tools + Settings
+﻿// src/sections/sections.tsx — Team + Tools + Settings
 import { useClientes } from "@/hooks/useClientes";
 import { formatCurrency } from "@/utils/formatters";
 
-// â”€â”€ TeamSection â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── TeamSection ───────────────────────────────────────────
 export function TeamSection() {
   const { data: all = [], isLoading } = useClientes();
 
@@ -28,7 +28,7 @@ export function TeamSection() {
     <div className="p-5 md:p-6 max-w-5xl mx-auto space-y-5">
       <div>
         <h2 className="text-sm font-bold text-white">Rendimiento del Equipo</h2>
-        <p className="text-xs text-slate-600 mt-0.5">MÃ©tricas individuales por setter</p>
+        <p className="text-xs text-slate-600 mt-0.5">Métricas individuales por setter</p>
       </div>
 
       {isLoading ? (
@@ -36,7 +36,7 @@ export function TeamSection() {
           {[1, 2].map(i => <div key={i} className="h-44 bg-slate-900 border border-slate-800 rounded-xl animate-pulse" />)}
         </div>
       ) : ranking.length === 0 ? (
-        <div className="text-center py-16 text-slate-600 text-sm">Sin datos de equipo aÃºn.</div>
+        <div className="text-center py-16 text-slate-600 text-sm">Sin datos de equipo aún.</div>
       ) : (
         <>
           {/* Tabla resumen */}
@@ -44,7 +44,7 @@ export function TeamSection() {
             <table className="w-full">
               <thead>
                 <tr className="border-b border-slate-800 bg-slate-950/60">
-                  {["#", "Setter", "Total Leads", "Cerrados", "Activos", "ConversiÃ³n", "Revenue"].map(h => (
+                  {["#", "Setter", "Total Leads", "Cerrados", "Activos", "Conversión", "Revenue"].map(h => (
                     <th key={h} className="px-4 py-3 text-left text-[11px] font-bold text-slate-500 uppercase tracking-wider">{h}</th>
                   ))}
                 </tr>
@@ -90,7 +90,7 @@ export function TeamSection() {
           <div className="grid md:grid-cols-2 gap-4">
             {ranking.map(([name, s]) => {
               const conv = s.total > 0 ? Math.round((s.cerrados / s.total) * 100) : 0;
-              const topSvc = Object.entries(s.servicios).sort((a, b) => b[1] - a[1])[0]?.[0] ?? "â€”";
+              const topSvc = Object.entries(s.servicios).sort((a, b) => b[1] - a[1])[0]?.[0] ?? "—";
               return (
                 <div key={name} className="bg-slate-900 border border-slate-800 rounded-xl p-5">
                   <div className="flex items-center justify-between mb-4">
@@ -138,37 +138,37 @@ export function TeamSection() {
 export default TeamSection;
 
 
-// â”€â”€ ToolsSection â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── ToolsSection ──────────────────────────────────────────
 const TOOLS = [
   {
     category: "Scripts de Venta",
     items: [
       { name: "Script: Discovery Call",       desc: "Preguntas clave para la llamada inicial",              tag: "Script", link: "#" },
-      { name: "Script: Manejo de Objeciones", desc: "Respuestas para las 5 objeciones mÃ¡s comunes",         tag: "Script", link: "#" },
-      { name: "Script: Cierre de Venta",      desc: "TÃ©cnicas de cierre probadas por servicio",             tag: "Script", link: "#" },
+      { name: "Script: Manejo de Objeciones", desc: "Respuestas para las 5 objeciones más comunes",         tag: "Script", link: "#" },
+      { name: "Script: Cierre de Venta",      desc: "Técnicas de cierre probadas por servicio",             tag: "Script", link: "#" },
     ]
   },
   {
     category: "Agendamiento",
     items: [
-      { name: "Calendly â€” Leandro",           desc: "Enlace para agendar llamadas de discovery",            tag: "Calendly", link: "https://calendly.com" },
-      { name: "Calendly â€” Equipo",            desc: "Enlace general del equipo de setters",                 tag: "Calendly", link: "https://calendly.com" },
+      { name: "Calendly — Leandro",           desc: "Enlace para agendar llamadas de discovery",            tag: "Calendly", link: "https://calendly.com" },
+      { name: "Calendly — Equipo",            desc: "Enlace general del equipo de setters",                 tag: "Calendly", link: "https://calendly.com" },
     ]
   },
   {
     category: "Recursos EMPREX",
     items: [
-      { name: "Portafolio de Servicios",      desc: "PresentaciÃ³n para enviar al cliente",                  tag: "PDF",  link: "#" },
-      { name: "Casos de Ã‰xito",               desc: "Resultados reales de clientes anteriores",             tag: "Doc",  link: "#" },
+      { name: "Portafolio de Servicios",      desc: "Presentación para enviar al cliente",                  tag: "PDF",  link: "#" },
+      { name: "Casos de Éxito",               desc: "Resultados reales de clientes anteriores",             tag: "Doc",  link: "#" },
       { name: "Propuesta Comercial",          desc: "Template editable de propuesta",                       tag: "Doc",  link: "#" },
     ]
   },
   {
     category: "Herramientas",
     items: [
-      { name: "Notion â€” Workspace",           desc: "Base de conocimiento y docs del equipo",              tag: "Tool", link: "https://notion.so" },
+      { name: "Notion — Workspace",           desc: "Base de conocimiento y docs del equipo",              tag: "Tool", link: "https://notion.so" },
       { name: "Google Drive",                 desc: "Archivos y recursos compartidos",                     tag: "Tool", link: "https://drive.google.com" },
-      { name: "WhatsApp Business",            desc: "Canal de comunicaciÃ³n con leads",                     tag: "WA",   link: "https://wa.me" },
+      { name: "WhatsApp Business",            desc: "Canal de comunicación con leads",                     tag: "WA",   link: "https://wa.me" },
     ]
   },
 ];
@@ -195,7 +195,7 @@ export function ToolsSection({ isAdmin }: { isAdmin: boolean }) {
                   </span>
                 </div>
                 <p className="text-xs text-slate-500 leading-relaxed">{tool.desc}</p>
-                <p className="text-xs text-blue-400 group-hover:text-blue-300 transition-colors mt-auto">Abrir â†’</p>
+                <p className="text-xs text-blue-400 group-hover:text-blue-300 transition-colors mt-auto">Abrir →</p>
               </a>
             ))}
           </div>
@@ -206,16 +206,16 @@ export function ToolsSection({ isAdmin }: { isAdmin: boolean }) {
 }
 
 
-// â”€â”€ SettingsSection â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── SettingsSection ───────────────────────────────────────
 export function SettingsSection({ userEmail }: { userEmail: string }) {
   const SETTERS   = ["Leandro M.", "Aldair V."];
-  const SERVICIOS = ["CampaÃ±as EMPREX", "DiseÃ±o de Landing Page", "Vlog Growth Specialist"];
+  const SERVICIOS = ["Campañas EMPREX", "Diseño de Landing Page", "Vlog Growth Specialist"];
 
   return (
     <div className="p-5 md:p-6 max-w-2xl mx-auto space-y-5">
       <div>
-        <h2 className="text-sm font-bold text-white">ConfiguraciÃ³n</h2>
-        <p className="text-xs text-slate-600 mt-0.5">GestiÃ³n del sistema Â· Solo administradores</p>
+        <h2 className="text-sm font-bold text-white">Configuración</h2>
+        <p className="text-xs text-slate-600 mt-0.5">Gestión del sistema · Solo administradores</p>
       </div>
 
       {/* Cuenta activa */}
@@ -249,7 +249,7 @@ export function SettingsSection({ userEmail }: { userEmail: string }) {
           ))}
         </div>
         <p className="text-xs text-slate-600 mt-3 leading-relaxed">
-          Para agregar un setter: ve a Supabase â†’ Authentication â†’ Users â†’ Add User.
+          Para agregar un setter: ve a Supabase → Authentication → Users → Add User.
         </p>
       </div>
 
@@ -274,7 +274,7 @@ export function SettingsSection({ userEmail }: { userEmail: string }) {
         </p>
         <a href="https://supabase.com/dashboard" target="_blank" rel="noopener noreferrer"
           className="inline-flex items-center gap-2 text-xs text-blue-400 hover:text-blue-300 transition-colors border border-slate-800 hover:border-slate-700 px-3 py-2 rounded-lg">
-          Ir a Supabase Dashboard â†’
+          Ir a Supabase Dashboard →
         </a>
       </div>
     </div>

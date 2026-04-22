@@ -84,7 +84,7 @@ export default function LeadsSection({ isAdmin, userEmail }: Props) {
   };
 
   const handleDelete = async (id: string) => {
-    if (!window.confirm("Â¿Eliminar este lead permanentemente?")) return;
+    if (!window.confirm("¿Eliminar este lead permanentemente?")) return;
     setDeleting(id);
     await deleteM.mutateAsync(id);
     setDeleting(null);
@@ -98,7 +98,7 @@ export default function LeadsSection({ isAdmin, userEmail }: Props) {
     { label: "Servicio" },
     { label: "Valor",      field: "valor_potencial" },
     { label: "Setter",     field: "setter_asignado" },
-    { label: "ReuniÃ³n",    field: "fecha_de_la_reunion" },
+    { label: "Reunión",    field: "fecha_de_la_reunion" },
     { label: "Origen" },
     { label: "Estado" },
   ];
@@ -210,7 +210,7 @@ export default function LeadsSection({ isAdmin, userEmail }: Props) {
                         </td>
                         {/* Servicio */}
                         <td className="px-4 py-3">
-                          <span className="text-xs text-slate-400">{c.servicio_adquirido || "â€”"}</span>
+                          <span className="text-xs text-slate-400">{c.servicio_adquirido || "—"}</span>
                         </td>
                         {/* Valor */}
                         <td className="px-4 py-3">
@@ -218,19 +218,19 @@ export default function LeadsSection({ isAdmin, userEmail }: Props) {
                         </td>
                         {/* Setter */}
                         <td className="px-4 py-3">
-                          <span className="text-xs text-slate-400">{c.setter_asignado || "â€”"}</span>
+                          <span className="text-xs text-slate-400">{c.setter_asignado || "—"}</span>
                         </td>
-                        {/* ReuniÃ³n */}
+                        {/* Reunión */}
                         <td className="px-4 py-3">
                           <div className="flex items-center gap-1 text-xs text-slate-500">
                             <Calendar size={11} className="text-slate-700" />
-                            {formatDate(c.fecha_de_la_reunion) ?? "â€”"}
+                            {formatDate(c.fecha_de_la_reunion) ?? "—"}
                           </div>
                         </td>
                         {/* Origen */}
                         <td className="px-4 py-3">
                           <span className="text-xs text-slate-500 bg-slate-800 border border-slate-700 px-2 py-0.5 rounded">
-                            {c.usuario_de_origen || "â€”"}
+                            {c.usuario_de_origen || "—"}
                           </span>
                         </td>
                         {/* Estado */}
@@ -316,8 +316,8 @@ export default function LeadsSection({ isAdmin, userEmail }: Props) {
                 <div>
                   <p className="text-sm font-bold text-white">{preview.nombre_y_apellido}</p>
                   {preview.cerro_la_venta
-                    ? <span className="text-xs text-emerald-400">â— Cerrado</span>
-                    : <span className="text-xs text-slate-500">â— Activo</span>}
+                    ? <span className="text-xs text-emerald-400">● Cerrado</span>
+                    : <span className="text-xs text-slate-500">● Activo</span>}
                 </div>
               </div>
 
@@ -327,11 +327,11 @@ export default function LeadsSection({ isAdmin, userEmail }: Props) {
                 { label: "Setter",        value: preview.setter_asignado },
                 { label: "Origen",        value: preview.usuario_de_origen },
                 { label: "Ingreso",       value: formatDate(preview.fecha) },
-                { label: "ReuniÃ³n",       value: formatDate(preview.fecha_de_la_reunion) },
+                { label: "Reunión",       value: formatDate(preview.fecha_de_la_reunion) },
               ].map(({ label, value }) => (
                 <div key={label} className="py-2.5 border-b border-slate-800">
                   <p className="text-[10px] font-bold text-slate-600 uppercase tracking-wider mb-1">{label}</p>
-                  <p className="text-sm text-slate-200">{value || "â€”"}</p>
+                  <p className="text-sm text-slate-200">{value || "—"}</p>
                 </div>
               ))}
 
@@ -371,4 +371,4 @@ export default function LeadsSection({ isAdmin, userEmail }: Props) {
       />
     </div>
   );
-}
+} 

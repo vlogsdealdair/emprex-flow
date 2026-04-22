@@ -1,5 +1,5 @@
 // src/sections/DashboardHome.tsx
-import { ArrowRight, TrendingUp, CheckCircle2, Clock, Users, Flame, DollarSign, Target } from "lucide-react";
+import { ArrowRight, TrendingUp, CheckCircle2, Clock, Users } from "lucide-react";
 import { useClientes } from "@/hooks/useClientes";
 import { formatCurrency, formatDate, getInitials } from "@/utils/formatters";
 import type { Section } from "@/pages/Dashboard";
@@ -49,124 +49,130 @@ export default function DashboardHome({ isAdmin, userEmail, onNavigate }: Props)
     const s = c.setter_asignado || "Sin asignar";
     if (!setterMap[s]) setterMap[s] = { total: 0, cerrados: 0, revenue: 0 };
     setterMap[s].total++;
-    if (c.cerro_la_venta) {
-      setterMap[s].cerrados++;
-      setterMap[s].revenue += c.valor_potencial ?? 0;
-    }
+    if (c.cerro_la_venta) { setterMap[s].cerrados++; setterMap[s].revenue += c.valor_potencial ?? 0; }
   });
-  const setterRanking = Object.entries(setterMap).sort((a, b) => b[1].revenue - a[1].revenue);
+  const setterRanking = Object.entries(setterMap).sort((a, b) => b[1].cerrados - a[1].cerrados);
 
-  // Actividad reciente
-  const recientes = [...clientes].sort((a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime()).slice(0, 5);
-
-  const kpis = [
-    { label: "Pipeline Total", value: formatCurrency(pipeline), sub: `${total} leads en total`, loading: isLoading },
-    { label: "Tasa de Cierre", value: `${conv}%`, sub: `${cerrados} ventas confirmadas`, loading: isLoading },
-    { label: "Leads Activos", value: String(activos), sub: "en seguimiento activo", loading: isLoading },
-    { label: "Revenue Real", value: formatCurrency(revenue), sub: "ingresos confirmados", loading: isLoading },
-  ];
+  // Recientes
+  const recientes = [...clientes]
+    .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+    .slice(0, 6);
 
   return (
-    <div className="p-5 md:p-6 max-w-5xl mx-auto space-y-5">
+    <div className="p-5 md:p-6 space-y-5 max-w-6xl mx-auto">
 
       {/* KPIs */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {kpis.map(k => <KPI key={k.label} {...k} />)}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <KPI label="Pipeline Total"  value={formatCurrency(pipeline)} sub={`${total} leads en total`}        loading={isLoading} />
+        <KPI label="Tasa de Cierre"  value={`${conv}%`}               sub={`${cerrados} ventas confirmadas`} loading={isLoading} />
+        <KPI label="Leads Activos"   value={String(activos)}          sub="en seguimiento"                   loading={isLoading} />
+        <KPI label="Revenue Real"    value={formatCurrency(revenue)}  sub="ingresos confirmados"             loading={isLoading} />
       </div>
 
-      <div className="grid lg:grid-cols-3 gap-4">
+      <div className={`grid gap-4 ${isAdmin ? "lg:grid-cols-3" : "lg:grid-cols-2"}`}>
 
         {/* Pipeline por servicio */}
-        <div className="lg:col-span-2 bg-slate-900 border border-slate-800 rounded-xl p-5">
-          <div className="flex items-center justify-between mb-4">
+        <div className={`bg-slate-900 border border-slate-800 rounded-xl p-5 ${isAdmin ? "lg:col-span-2" : ""}`}>
+          <div className="flex items-center justify-between mb-5">
             <div>
-              <h2 className="text-sm font-bold text-white">Distribución por Servicio</h2>
-              <p className="text-xs text-slate-600 mt-0.5">Leads activos por categoría</p>
+              <h2 className="text-sm font-bold text-white">Pipeline por Servicio</h2>
+              <p className="text-xs text-slate-600 mt-0.5">Distribución de leads</p>
             </div>
             <button onClick={() => onNavigate("leads")}
-              className="flex items-center gap-1 text-xs text-blue-400 hover:text-blue-300 transition-colors">
-              Ver todos <ArrowRight size={11} />
+              className="text-xs text-blue-400 hover:text-blue-300 flex items-center gap-1 transition-colors">
+              Ver leads <ArrowRight size={11} />
             </button>
           </div>
+
           {isLoading ? (
-            <div className="space-y-3">
-              {Array.from({ length: 3 }).map((_, i) => (
-                <div key={i} className="animate-pulse">
-                  <div className="flex justify-between mb-1.5">
-                    <div className="h-3 bg-slate-800 rounded w-32" />
-                    <div className="h-3 bg-slate-800 rounded w-8" />
-                  </div>
-                  <div className="h-2 bg-slate-800 rounded-full" />
+            <div className="space-y-4">
+              {[1,2,3].map(i => (
+                <div key={i} className="animate-pulse space-y-1.5">
+                  <div className="h-3 bg-slate-800 rounded w-32" />
+                  <div className="h-1.5 bg-slate-800 rounded-full" />
                 </div>
               ))}
             </div>
           ) : svcEntries.length === 0 ? (
             <div className="flex flex-col items-center py-10 gap-2">
-              <Users size={24} className="text-slate-700" />
+              <TrendingUp size={24} className="text-slate-700" />
               <p className="text-sm text-slate-600">Sin datos aún</p>
             </div>
           ) : (
             <div className="space-y-4">
-              {svcEntries.map(([svc, stats], i) => {
-                const pct = Math.round((stats.total / maxSvc) * 100);
-                const colors = ["bg-blue-500", "bg-cyan-500", "bg-violet-500", "bg-emerald-500", "bg-amber-500"];
+              {svcEntries.map(([svc, counts]) => {
+                const pct = Math.round((counts.total / maxSvc) * 100);
+                const convPct = counts.total > 0 ? Math.round((counts.cerrados / counts.total) * 100) : 0;
                 return (
                   <div key={svc}>
                     <div className="flex items-center justify-between mb-1.5">
-                      <span className="text-xs font-medium text-slate-300">{svc}</span>
-                      <span className="text-xs text-slate-500 font-mono">{stats.total} ({stats.cerrados} cerrados)</span>
+                      <span className="text-xs font-medium text-slate-300 truncate max-w-[60%]">{svc}</span>
+                      <div className="flex items-center gap-3 text-xs text-slate-500">
+                        <span>{counts.total} leads</span>
+                        <span className="text-emerald-500">{convPct}% cerrado</span>
+                      </div>
                     </div>
-                    <div className="h-2 bg-slate-800 rounded-full overflow-hidden">
-                      <div className={`h-full rounded-full transition-all duration-700 ${colors[i % colors.length]}`} style={{ width: `${pct}%` }} />
+                    <div className="h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                      <div className="h-full bg-blue-600 rounded-full transition-all duration-500"
+                        style={{ width: `${pct}%` }} />
                     </div>
                   </div>
                 );
               })}
             </div>
           )}
+
+          {/* Barra conversión global */}
+          {!isLoading && total > 0 && (
+            <div className="mt-5 pt-4 border-t border-slate-800">
+              <div className="flex justify-between mb-1.5">
+                <span className="text-xs text-slate-600">Conversión global</span>
+                <span className="text-xs font-semibold text-white">{conv}%</span>
+              </div>
+              <div className="h-2 bg-slate-800 rounded-full overflow-hidden flex">
+                <div className="bg-emerald-600 h-full transition-all duration-500" style={{ width: `${conv}%` }} />
+              </div>
+              <div className="flex justify-between mt-1.5 text-[10px] text-slate-600">
+                <span>{cerrados} cerrados</span>
+                <span>{activos} activos</span>
+              </div>
+            </div>
+          )}
         </div>
 
-        {/* Ranking setters */}
+        {/* Ranking setters — solo admin */}
         {isAdmin && (
           <div className="bg-slate-900 border border-slate-800 rounded-xl p-5">
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <h2 className="text-sm font-bold text-white">Ranking Setters</h2>
-                <p className="text-xs text-slate-600 mt-0.5">Por revenue generado</p>
-              </div>
-              <Flame size={15} className="text-amber-500" />
+            <div className="mb-5">
+              <h2 className="text-sm font-bold text-white">Equipo</h2>
+              <p className="text-xs text-slate-600 mt-0.5">Rendimiento por setter</p>
             </div>
             {isLoading ? (
               <div className="space-y-3">
-                {Array.from({ length: 3 }).map((_, i) => (
-                  <div key={i} className="h-12 bg-slate-800 rounded-xl animate-pulse" />
-                ))}
+                {[1,2,3].map(i => <div key={i} className="h-12 bg-slate-800 rounded-lg animate-pulse" />)}
               </div>
             ) : setterRanking.length === 0 ? (
-              <div className="flex flex-col items-center py-10 gap-2">
-                <Users size={24} className="text-slate-700" />
-                <p className="text-sm text-slate-600">Sin datos de equipo aún</p>
-              </div>
+              <p className="text-sm text-slate-600 text-center py-8">Sin datos</p>
             ) : (
-              <div className="space-y-2.5">
-                {setterRanking.slice(0, 5).map(([name, stats], i) => (
-                  <div key={name} className="flex items-center gap-3 p-3 rounded-xl bg-slate-800/50 hover:bg-slate-800 transition-colors">
-                    <div className={`w-6 h-6 rounded-lg flex items-center justify-center text-xs font-bold flex-shrink-0 ${
-                      i === 0 ? "bg-amber-500/20 text-amber-400" :
-                      i === 1 ? "bg-slate-600/50 text-slate-300" :
-                      "bg-slate-700/50 text-slate-500"
-                    }`}>
-                      {i + 1}
+              <div className="space-y-2">
+                {setterRanking.map(([name, s], i) => {
+                  const pct = s.total > 0 ? Math.round((s.cerrados / s.total) * 100) : 0;
+                  return (
+                    <div key={name} className="p-3 rounded-lg bg-slate-800/50 hover:bg-slate-800 transition-colors">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-bold text-slate-500 w-4">#{i+1}</span>
+                          <span className="text-xs font-semibold text-slate-200">{name}</span>
+                        </div>
+                        <span className="text-xs font-mono text-slate-300">{s.cerrados}/{s.total}</span>
+                      </div>
+                      <div className="h-1 bg-slate-700 rounded-full overflow-hidden">
+                        <div className="h-full bg-blue-500 rounded-full transition-all duration-500"
+                          style={{ width: `${pct}%` }} />
+                      </div>
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs font-semibold text-slate-200 truncate">{name}</p>
-                      <p className="text-[10px] text-slate-600">{stats.cerrados}/{stats.total} cerrados</p>
-                    </div>
-                    <div className="text-right flex-shrink-0">
-                      <p className="text-xs font-mono font-bold text-emerald-400">{formatCurrency(stats.revenue)}</p>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>
@@ -176,17 +182,19 @@ export default function DashboardHome({ isAdmin, userEmail, onNavigate }: Props)
       {/* Actividad reciente */}
       <div className="bg-slate-900 border border-slate-800 rounded-xl p-5">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-sm font-bold text-white">Actividad Reciente</h2>
+          <div>
+            <h2 className="text-sm font-bold text-white">Actividad Reciente</h2>
+            <p className="text-xs text-slate-600 mt-0.5">Últimos leads registrados</p>
+          </div>
           <button onClick={() => onNavigate("leads")}
-            className="flex items-center gap-1 text-xs text-blue-400 hover:text-blue-300 transition-colors">
+            className="text-xs text-blue-400 hover:text-blue-300 flex items-center gap-1 transition-colors">
             Ver todos <ArrowRight size={11} />
           </button>
         </div>
+
         {isLoading ? (
-          <div className="space-y-3">
-            {Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="h-14 bg-slate-800 rounded-xl animate-pulse" />
-            ))}
+          <div className="space-y-2">
+            {[1,2,3,4].map(i => <div key={i} className="h-14 bg-slate-800 rounded-lg animate-pulse" />)}
           </div>
         ) : recientes.length === 0 ? (
           <div className="flex flex-col items-center py-10 gap-2">
