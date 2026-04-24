@@ -133,7 +133,7 @@ export default function Dashboard() {
           {section === "home"     && <DashboardHome  isAdmin={isAdmin} userEmail={userEmail} onNavigate={setSection} />}
           {section === "leads"    && <LeadsSection   isAdmin={isAdmin} userEmail={userEmail} />}
           {section === "team"     && <TeamSection    />}
-          {section === "tools"    && <ToolsSection   isAdmin={isAdmin} />}
+          {section === "tools"    && <ToolsSection />}
           {section === "settings" && <SettingsSection userEmail={userEmail} />}
         </main>
       </div>

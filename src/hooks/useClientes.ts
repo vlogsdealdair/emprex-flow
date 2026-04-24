@@ -1,5 +1,3 @@
-// src/hooks/useClientes.ts
-// Real-time sync via Supabase channel
 import { useEffect } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -7,7 +5,7 @@ import {
   fetchClientes, createCliente, updateCliente,
   updateClienteStatus, deleteCliente,
 } from "@/services/clienteService";
-import type { ClienteInsert, ClienteUpdate } from "@/types/cliente";
+import type { ClienteInsert, ClienteUpdate, Cliente } from "@/types/cliente";
 
 const KEY = ["clientes"] as const;
 
@@ -40,7 +38,7 @@ export function useClientes() {
     return () => { supabase.removeChannel(channel); };
   }, [qc]);
 
-  return useQuery({
+  return useQuery<Cliente[]>({
     queryKey: KEY,
     queryFn: async () => {
       const { data, error } = await fetchClientes();
@@ -53,29 +51,29 @@ export function useClientes() {
 
 export function useCreateCliente() {
   const qc = useQueryClient();
-  return useMutation({
+  return useMutation<Cliente, Error, ClienteInsert>({
     mutationFn: async (payload: ClienteInsert) => {
       const { data, error } = await createCliente(payload);
       if (error) throw new Error(error.message);
       return data!;
     },
     onSuccess: (n) => {
-      qc.setQueryData(KEY, (p: any) => p ? [n, ...p.filter((c: any) => c.id !== n.id)] : [n]);
+      qc.setQueryData<Cliente[]>(KEY, (p) => p ? [n, ...p.filter((c) => c.id !== n.id)] : [n]);
     },
   });
 }
 
 export function useUpdateCliente() {
   const qc = useQueryClient();
-  return useMutation({
+  return useMutation<Cliente, Error, { id: string; payload: ClienteUpdate }>({
     mutationFn: async ({ id, payload }: { id: string; payload: ClienteUpdate }) => {
       const { data, error } = await updateCliente(id, payload);
       if (error) throw new Error(error.message);
       return data!;
     },
     onSuccess: (updated) => {
-      qc.setQueryData(KEY, (p: any) =>
-        p?.map((c: any) => c.id === updated.id ? updated : c)
+      qc.setQueryData<Cliente[]>(KEY, (p) =>
+        p?.map((c) => c.id === updated.id ? updated : c)
       );
     },
   });
@@ -83,7 +81,7 @@ export function useUpdateCliente() {
 
 export function useToggleClienteStatus() {
   const qc = useQueryClient();
-  return useMutation({
+  return useMutation<Cliente, Error, { id: string; cerro_la_venta: boolean }, { prev?: Cliente[] }>({
     mutationFn: async ({ id, cerro_la_venta }: { id: string; cerro_la_venta: boolean }) => {
       const { data, error } = await updateClienteStatus(id, cerro_la_venta);
       if (error) throw new Error(error.message);
@@ -91,14 +89,15 @@ export function useToggleClienteStatus() {
     },
     onMutate: async ({ id, cerro_la_venta }) => {
       await qc.cancelQueries({ queryKey: KEY });
-      const prev = qc.getQueryData(KEY);
-      qc.setQueryData(KEY, (p: any) =>
-        p?.map((c: any) => c.id === id ? { ...c, cerro_la_venta } : c)
+      const prev = qc.getQueryData<Cliente[]>(KEY);
+      qc.setQueryData<Cliente[]>(KEY, (p) =>
+        p?.map((c) => c.id === id ? { ...c, cerro_la_venta } : c)
       );
       return { prev };
     },
-    onError: (_, __, ctx) => {
-      if (ctx?.prev) qc.setQueryData(KEY, ctx.prev);
+    onError: (_, __, ___, ctx) => {
+      const context = ctx as { prev?: Cliente[] };
+      if (context?.prev) qc.setQueryData(KEY, context.prev);
     },
     onSettled: () => qc.invalidateQueries({ queryKey: KEY }),
   });
@@ -106,13 +105,13 @@ export function useToggleClienteStatus() {
 
 export function useDeleteCliente() {
   const qc = useQueryClient();
-  return useMutation({
+  return useMutation<void, Error, string>({
     mutationFn: async (id: string) => {
       const { error } = await deleteCliente(id);
       if (error) throw new Error(error.message);
     },
     onSuccess: (_, id) => {
-      qc.setQueryData(KEY, (p: any) => p?.filter((c: any) => c.id !== id));
+      qc.setQueryData<Cliente[]>(KEY, (p) => p?.filter((c) => c.id !== id));
     },
   });
 }

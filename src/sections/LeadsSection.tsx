@@ -167,7 +167,7 @@ export default function LeadsSection({ isAdmin, userEmail }: Props) {
                   <td className="px-4 py-3"><span className="text-xs text-slate-400">{c.setter_asignado || "—"}</span></td>
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-1 text-xs text-slate-500">
-                      <Calendar size={11} className="text-slate-700" />{formatDate(c.fecha_de_la_reunion) ?? "—"}
+                      <Calendar size={11} className="text-slate-700" />{c.fecha_de_la_reunion ? formatDate(c.fecha_de_la_reunion) : "—"}
                     </div>
                   </td>
                   <td className="px-4 py-3"><span className="text-xs text-slate-500 bg-slate-800 border border-slate-700 px-2 py-0.5 rounded">{c.usuario_de_origen || "—"}</span></td>
@@ -228,7 +228,7 @@ export default function LeadsSection({ isAdmin, userEmail }: Props) {
                 { label: "Setter", value: preview.setter_asignado },
                 { label: "Origen", value: preview.usuario_de_origen },
                 { label: "Ingreso", value: formatDate(preview.fecha) },
-                { label: "Reunión", value: preview.fecha_de_la_reunion ? formatDate(preview.fecha_de_la_reunion) : "—" },
+                { label: "Reunión", value: preview.fecha_de_la_reunion ? formatDate(preview.fecha_de_la_reunion!) : "—" },
               ].map(({ label, value }) => (
                 <div key={label} className="py-2.5 border-b border-slate-800">
                   <p className="text-[10px] font-bold text-slate-600 uppercase tracking-wider mb-1">{label}</p>
