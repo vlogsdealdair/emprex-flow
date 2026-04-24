@@ -1,6 +1,6 @@
 import { ArrowRight, TrendingUp, CheckCircle2, Clock, Users } from "lucide-react";
 import { useClientes } from "@/hooks/useClientes";
-import { formatCurrency, formatDate, getInitials } from "@/utils/formatters";
+import { formatCurrency, getInitials } from "@/utils/formatters";
 import type { Section } from "@/pages/Dashboard";
 
 interface Props { isAdmin: boolean; userEmail: string; onNavigate: (s: Section) => void; }

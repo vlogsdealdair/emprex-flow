@@ -44,7 +44,7 @@ export function useClientes() {
     queryKey: KEY,
     queryFn: async () => {
       const { data, error } = await fetchClientes();
-      if (error) throw new Error(error);
+      if (error) throw new Error(error.message);
       return data!;
     },
     staleTime: 1000 * 60,
@@ -56,7 +56,7 @@ export function useCreateCliente() {
   return useMutation({
     mutationFn: async (payload: ClienteInsert) => {
       const { data, error } = await createCliente(payload);
-      if (error) throw new Error(error);
+      if (error) throw new Error(error.message);
       return data!;
     },
     onSuccess: (n) => {
@@ -70,7 +70,7 @@ export function useUpdateCliente() {
   return useMutation({
     mutationFn: async ({ id, payload }: { id: string; payload: ClienteUpdate }) => {
       const { data, error } = await updateCliente(id, payload);
-      if (error) throw new Error(error);
+      if (error) throw new Error(error.message);
       return data!;
     },
     onSuccess: (updated) => {
@@ -86,7 +86,7 @@ export function useToggleClienteStatus() {
   return useMutation({
     mutationFn: async ({ id, cerro_la_venta }: { id: string; cerro_la_venta: boolean }) => {
       const { data, error } = await updateClienteStatus(id, cerro_la_venta);
-      if (error) throw new Error(error);
+      if (error) throw new Error(error.message);
       return data!;
     },
     onMutate: async ({ id, cerro_la_venta }) => {
@@ -109,7 +109,7 @@ export function useDeleteCliente() {
   return useMutation({
     mutationFn: async (id: string) => {
       const { error } = await deleteCliente(id);
-      if (error) throw new Error(error);
+      if (error) throw new Error(error.message);
     },
     onSuccess: (_, id) => {
       qc.setQueryData(KEY, (p: any) => p?.filter((c: any) => c.id !== id));

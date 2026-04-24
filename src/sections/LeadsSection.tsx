@@ -228,7 +228,7 @@ export default function LeadsSection({ isAdmin, userEmail }: Props) {
                 { label: "Setter", value: preview.setter_asignado },
                 { label: "Origen", value: preview.usuario_de_origen },
                 { label: "Ingreso", value: formatDate(preview.fecha) },
-                { label: "Reunión", value: formatDate(preview.fecha_de_la_reunion) },
+                { label: "Reunión", value: preview.fecha_de_la_reunion ? formatDate(preview.fecha_de_la_reunion) : "—" },
               ].map(({ label, value }) => (
                 <div key={label} className="py-2.5 border-b border-slate-800">
                   <p className="text-[10px] font-bold text-slate-600 uppercase tracking-wider mb-1">{label}</p>
