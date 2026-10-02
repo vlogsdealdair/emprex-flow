@@ -3,6 +3,11 @@ import {
   createDeal,
   deleteDeal,
   fetchCurrentProfile,
+  fetchClients,
+  fetchNotifications,
+  markNotificationRead,
+  createService,
+  updateService,
   fetchDealActivities,
   fetchDealTasks,
   fetchDealPayments,
@@ -27,6 +32,8 @@ export const CRM_KEYS = {
   stages: ["crm", "stages"] as const,
   services: ["crm", "services"] as const,
   team: ["crm", "team"] as const,
+  clients: ["crm", "clients"] as const,
+  notifications: ["crm", "notifications"] as const,
   activities: (dealId: string) => ["crm", "activities", dealId] as const,
   tasks: (dealId: string) => ["crm", "tasks", dealId] as const,
   payments: (dealId: string) => ["crm", "payments", dealId] as const,
@@ -140,5 +147,38 @@ export function useToggleTaskComplete() {
   return useMutation<void, Error, { task: Task; dealId: string }>({
     mutationFn: ({ task }) => toggleTaskComplete(task),
     onSuccess: (_, vars) => qc.invalidateQueries({ queryKey: CRM_KEYS.tasks(vars.dealId) }),
+  });
+}
+
+
+export function useClients() {
+  return useQuery({ queryKey: CRM_KEYS.clients, queryFn: fetchClients, staleTime: 30_000 });
+}
+
+export function useNotifications() {
+  return useQuery({ queryKey: CRM_KEYS.notifications, queryFn: fetchNotifications, refetchInterval: 30_000 });
+}
+
+export function useMarkNotificationRead() {
+  const qc = useQueryClient();
+  return useMutation<void, Error, string>({
+    mutationFn: markNotificationRead,
+    onSuccess: () => qc.invalidateQueries({ queryKey: CRM_KEYS.notifications }),
+  });
+}
+
+export function useCreateService() {
+  const qc = useQueryClient();
+  return useMutation<void, Error, { name: string; description?: string | null; defaultPriceUsd?: number | null }>({
+    mutationFn: createService,
+    onSuccess: () => qc.invalidateQueries({ queryKey: CRM_KEYS.services }),
+  });
+}
+
+export function useUpdateService() {
+  const qc = useQueryClient();
+  return useMutation<void, Error, { id: string; patch: { name?: string; description?: string | null; default_price_usd?: number | null; is_active?: boolean } }>({
+    mutationFn: ({ id, patch }) => updateService(id, patch),
+    onSuccess: () => qc.invalidateQueries({ queryKey: CRM_KEYS.services }),
   });
 }
