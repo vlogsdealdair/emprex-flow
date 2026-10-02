@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { fetchAppSettings, updateMyProfile, uploadAvatar, uploadLogo } from "@/services/adminService";
 import {
   createDeal,
   deleteDeal,
@@ -40,6 +41,7 @@ export const CRM_KEYS = {
   clients: ["crm", "clients"] as const,
   notifications: ["crm", "notifications"] as const,
   targets: ["crm", "targets"] as const,
+  appSettings: ["crm", "app-settings"] as const,
   activities: (dealId: string) => ["crm", "activities", dealId] as const,
   tasks: (dealId: string) => ["crm", "tasks", dealId] as const,
   payments: (dealId: string) => ["crm", "payments", dealId] as const,
@@ -253,5 +255,34 @@ export function useUpsertSalesTarget() {
   }>({
     mutationFn: upsertSalesTarget,
     onSuccess: () => qc.invalidateQueries({ queryKey: CRM_KEYS.targets }),
+  });
+}
+
+
+export function useAppSettings() {
+  return useQuery({ queryKey: CRM_KEYS.appSettings, queryFn: fetchAppSettings, staleTime: 300_000 });
+}
+
+export function useUpdateMyProfile() {
+  const qc = useQueryClient();
+  return useMutation<void, Error, { full_name: string; phone?: string | null; job_title?: string | null }>({
+    mutationFn: updateMyProfile,
+    onSuccess: () => qc.invalidateQueries({ queryKey: CRM_KEYS.profile }),
+  });
+}
+
+export function useUploadAvatar() {
+  const qc = useQueryClient();
+  return useMutation<string, Error, File>({
+    mutationFn: uploadAvatar,
+    onSuccess: () => qc.invalidateQueries({ queryKey: CRM_KEYS.profile }),
+  });
+}
+
+export function useUploadLogo() {
+  const qc = useQueryClient();
+  return useMutation<string, Error, File>({
+    mutationFn: uploadLogo,
+    onSuccess: () => qc.invalidateQueries({ queryKey: CRM_KEYS.appSettings }),
   });
 }
