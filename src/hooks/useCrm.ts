@@ -189,7 +189,7 @@ export function useMarkNotificationRead() {
 
 export function useCreateService() {
   const qc = useQueryClient();
-  return useMutation<void, Error, { name: string; description?: string | null; defaultPriceUsd?: number | null }>({
+  return useMutation<void, Error, { name: string; description?: string | null; defaultPriceUsd?: number | null; pricingMinUsd?: number | null; pricingMaxUsd?: number | null; internalNotes?: string | null }>({
     mutationFn: createService,
     onSuccess: () => qc.invalidateQueries({ queryKey: CRM_KEYS.services }),
   });
@@ -197,7 +197,7 @@ export function useCreateService() {
 
 export function useUpdateService() {
   const qc = useQueryClient();
-  return useMutation<void, Error, { id: string; patch: { name?: string; description?: string | null; default_price_usd?: number | null; is_active?: boolean } }>({
+  return useMutation<void, Error, { id: string; patch: { name?: string; description?: string | null; default_price_usd?: number | null; pricing_min_usd?: number | null; pricing_max_usd?: number | null; internal_notes?: string | null; is_active?: boolean } }>({
     mutationFn: ({ id, patch }) => updateService(id, patch),
     onSuccess: () => qc.invalidateQueries({ queryKey: CRM_KEYS.services }),
   });
