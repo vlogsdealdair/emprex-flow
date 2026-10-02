@@ -215,6 +215,148 @@ export type Database = {
           },
         ]
       }
+      commission_payments: {
+        Row: {
+          amount_usd: number
+          commission_id: string
+          created_at: string
+          created_by: string | null
+          id: string
+          note: string | null
+          paid_at: string
+        }
+        Insert: {
+          amount_usd: number
+          commission_id: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          note?: string | null
+          paid_at?: string
+        }
+        Update: {
+          amount_usd?: number
+          commission_id?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          note?: string | null
+          paid_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "commission_payments_commission_id_fkey"
+            columns: ["commission_id"]
+            isOneToOne: false
+            referencedRelation: "commissions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commission_payments_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      commission_rules: {
+        Row: {
+          calculation_type: string
+          created_at: string
+          event_key: string
+          id: string
+          is_active: boolean
+          label: string
+          role: Database["public"]["Enums"]["app_role"]
+          updated_at: string
+          value: number
+        }
+        Insert: {
+          calculation_type: string
+          created_at?: string
+          event_key: string
+          id?: string
+          is_active?: boolean
+          label: string
+          role: Database["public"]["Enums"]["app_role"]
+          updated_at?: string
+          value?: number
+        }
+        Update: {
+          calculation_type?: string
+          created_at?: string
+          event_key?: string
+          id?: string
+          is_active?: boolean
+          label?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          updated_at?: string
+          value?: number
+        }
+        Relationships: []
+      }
+      commissions: {
+        Row: {
+          base_amount_usd: number
+          commission_amount_usd: number
+          created_at: string
+          deal_id: string
+          earned_at: string
+          event_key: string
+          id: string
+          profile_id: string
+          role: Database["public"]["Enums"]["app_role"]
+          rule_id: string | null
+        }
+        Insert: {
+          base_amount_usd?: number
+          commission_amount_usd?: number
+          created_at?: string
+          deal_id: string
+          earned_at?: string
+          event_key: string
+          id?: string
+          profile_id: string
+          role: Database["public"]["Enums"]["app_role"]
+          rule_id?: string | null
+        }
+        Update: {
+          base_amount_usd?: number
+          commission_amount_usd?: number
+          created_at?: string
+          deal_id?: string
+          earned_at?: string
+          event_key?: string
+          id?: string
+          profile_id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          rule_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "commissions_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "deals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commissions_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commissions_rule_id_fkey"
+            columns: ["rule_id"]
+            isOneToOne: false
+            referencedRelation: "commission_rules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       contacts: {
         Row: {
           company: string | null
@@ -607,8 +749,11 @@ export type Database = {
           default_price_usd: number | null
           description: string | null
           id: string
+          internal_notes: string | null
           is_active: boolean
           name: string
+          pricing_max_usd: number | null
+          pricing_min_usd: number | null
           updated_at: string
         }
         Insert: {
@@ -616,8 +761,11 @@ export type Database = {
           default_price_usd?: number | null
           description?: string | null
           id?: string
+          internal_notes?: string | null
           is_active?: boolean
           name: string
+          pricing_max_usd?: number | null
+          pricing_min_usd?: number | null
           updated_at?: string
         }
         Update: {
@@ -625,8 +773,11 @@ export type Database = {
           default_price_usd?: number | null
           description?: string | null
           id?: string
+          internal_notes?: string | null
           is_active?: boolean
           name?: string
+          pricing_max_usd?: number | null
+          pricing_min_usd?: number | null
           updated_at?: string
         }
         Relationships: []
@@ -704,6 +855,45 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      tool_links: {
+        Row: {
+          created_at: string
+          description: string | null
+          icon_key: string | null
+          id: string
+          is_active: boolean
+          key: string
+          name: string
+          position: number
+          updated_at: string
+          url: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          icon_key?: string | null
+          id?: string
+          is_active?: boolean
+          key: string
+          name: string
+          position?: number
+          updated_at?: string
+          url: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          icon_key?: string | null
+          id?: string
+          is_active?: boolean
+          key?: string
+          name?: string
+          position?: number
+          updated_at?: string
+          url?: string
+        }
+        Relationships: []
       }
     }
     Views: {
