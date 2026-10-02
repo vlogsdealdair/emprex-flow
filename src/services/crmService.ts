@@ -231,3 +231,33 @@ export async function fetchDealPayments(dealId: string): Promise<Payment[]> {
   if (error) throw error;
   return data ?? [];
 }
+
+
+export async function createDealTask(input: {
+  dealId: string;
+  contactId: string;
+  title: string;
+  description?: string | null;
+  dueAt?: string | null;
+  assignedTo: string;
+  createdBy: string;
+  priority?: "low" | "medium" | "high" | "urgent";
+}): Promise<void> {
+  const { error } = await supabase.from("tasks").insert({
+    deal_id: input.dealId,
+    contact_id: input.contactId,
+    title: input.title.trim(),
+    description: input.description || null,
+    due_at: input.dueAt || null,
+    assigned_to: input.assignedTo,
+    created_by: input.createdBy,
+    priority: input.priority ?? "medium",
+  });
+  if (error) throw error;
+}
+
+export async function toggleTaskComplete(task: Task): Promise<void> {
+  const completed_at = task.completed_at ? null : new Date().toISOString();
+  const { error } = await supabase.from("tasks").update({ completed_at }).eq("id", task.id);
+  if (error) throw error;
+}
