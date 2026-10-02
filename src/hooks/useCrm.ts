@@ -7,6 +7,9 @@ import {
   fetchDealTasks,
   fetchDealPayments,
   addDealNote,
+  createDealTask,
+  toggleTaskComplete,
+  type Task,
   fetchDeals,
   fetchPipelineStages,
   fetchServices,
@@ -111,5 +114,31 @@ export function useAddDealNote() {
   return useMutation<void, Error, { dealId: string; contactId: string; body: string; profileId: string }>({
     mutationFn: ({ dealId, contactId, body, profileId }) => addDealNote(dealId, contactId, body, profileId),
     onSuccess: (_, vars) => qc.invalidateQueries({ queryKey: CRM_KEYS.activities(vars.dealId) }),
+  });
+}
+
+
+export function useCreateDealTask() {
+  const qc = useQueryClient();
+  return useMutation<void, Error, {
+    dealId: string;
+    contactId: string;
+    title: string;
+    description?: string | null;
+    dueAt?: string | null;
+    assignedTo: string;
+    createdBy: string;
+    priority?: "low" | "medium" | "high" | "urgent";
+  }>({
+    mutationFn: createDealTask,
+    onSuccess: (_, vars) => qc.invalidateQueries({ queryKey: CRM_KEYS.tasks(vars.dealId) }),
+  });
+}
+
+export function useToggleTaskComplete() {
+  const qc = useQueryClient();
+  return useMutation<void, Error, { task: Task; dealId: string }>({
+    mutationFn: ({ task }) => toggleTaskComplete(task),
+    onSuccess: (_, vars) => qc.invalidateQueries({ queryKey: CRM_KEYS.tasks(vars.dealId) }),
   });
 }
