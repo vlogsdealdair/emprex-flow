@@ -14,6 +14,14 @@ import {
   logDealActivity,
   fetchSalesTargets,
   upsertSalesTarget,
+  fetchAllServices,
+  deleteService,
+  fetchToolLinks,
+  updateToolLink,
+  fetchCommissionRules,
+  updateCommissionRule,
+  fetchCommissions,
+  createCommissionPayment,
   fetchDealActivities,
   fetchDealTasks,
   fetchDealPayments,
@@ -42,6 +50,10 @@ export const CRM_KEYS = {
   notifications: ["crm", "notifications"] as const,
   targets: ["crm", "targets"] as const,
   appSettings: ["crm", "app-settings"] as const,
+  allServices: ["crm", "all-services"] as const,
+  tools: ["crm", "tools"] as const,
+  commissionRules: ["crm", "commission-rules"] as const,
+  commissions: ["crm", "commissions"] as const,
   activities: (dealId: string) => ["crm", "activities", dealId] as const,
   tasks: (dealId: string) => ["crm", "tasks", dealId] as const,
   payments: (dealId: string) => ["crm", "payments", dealId] as const,
@@ -284,5 +296,57 @@ export function useUploadLogo() {
   return useMutation<string, Error, File>({
     mutationFn: uploadLogo,
     onSuccess: () => qc.invalidateQueries({ queryKey: CRM_KEYS.appSettings }),
+  });
+}
+
+
+export function useAllServices() {
+  return useQuery({ queryKey: CRM_KEYS.allServices, queryFn: fetchAllServices, staleTime: 60_000 });
+}
+
+export function useDeleteService() {
+  const qc = useQueryClient();
+  return useMutation<void, Error, string>({
+    mutationFn: deleteService,
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: CRM_KEYS.allServices });
+      qc.invalidateQueries({ queryKey: CRM_KEYS.services });
+    },
+  });
+}
+
+export function useToolLinks() {
+  return useQuery({ queryKey: CRM_KEYS.tools, queryFn: fetchToolLinks, staleTime: 60_000 });
+}
+
+export function useUpdateToolLink() {
+  const qc = useQueryClient();
+  return useMutation<void, Error, { id: string; patch: { name?: string; description?: string | null; url?: string; is_active?: boolean; position?: number } }>({
+    mutationFn: ({ id, patch }) => updateToolLink(id, patch),
+    onSuccess: () => qc.invalidateQueries({ queryKey: CRM_KEYS.tools }),
+  });
+}
+
+export function useCommissionRules() {
+  return useQuery({ queryKey: CRM_KEYS.commissionRules, queryFn: fetchCommissionRules, staleTime: 60_000 });
+}
+
+export function useUpdateCommissionRule() {
+  const qc = useQueryClient();
+  return useMutation<void, Error, { id: string; patch: { calculation_type?: string; value?: number; is_active?: boolean; label?: string } }>({
+    mutationFn: ({ id, patch }) => updateCommissionRule(id, patch),
+    onSuccess: () => qc.invalidateQueries({ queryKey: CRM_KEYS.commissionRules }),
+  });
+}
+
+export function useCommissions() {
+  return useQuery({ queryKey: CRM_KEYS.commissions, queryFn: fetchCommissions, staleTime: 30_000 });
+}
+
+export function useCreateCommissionPayment() {
+  const qc = useQueryClient();
+  return useMutation<void, Error, { commissionId: string; amountUsd: number; note?: string | null; createdBy: string }>({
+    mutationFn: createCommissionPayment,
+    onSuccess: () => qc.invalidateQueries({ queryKey: CRM_KEYS.commissions }),
   });
 }
