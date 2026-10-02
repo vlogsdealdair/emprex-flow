@@ -1,29 +1,23 @@
 import { useEffect, useState } from "react";
-import { Camera, Plus, Save, UserPlus, Image as ImageIcon } from "lucide-react";
+import { Camera, Save, UserPlus, Image as ImageIcon } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   useAppSettings,
-  useCreateService,
   useCurrentProfile,
-  useServices,
   useTeam,
   useUpdateMyProfile,
   useUpdateProfile,
-  useUpdateService,
   useUploadAvatar,
   useUploadLogo,
 } from "@/hooks/useCrm";
 import { createCrmUser } from "@/services/adminService";
-import { formatCurrency } from "@/utils/formatters";
+import ServiceManagement from "@/components/ServiceManagement";
 
 export default function SettingsSection({ userEmail }: { userEmail: string }) {
   const qc = useQueryClient();
   const { data: profile } = useCurrentProfile();
   const { data: appSettings } = useAppSettings();
-  const { data: services = [] } = useServices();
   const { data: team = [] } = useTeam(profile?.role === "admin");
-  const createService = useCreateService();
-  const updateService = useUpdateService();
   const updateProfile = useUpdateProfile();
   const updateMyProfile = useUpdateMyProfile();
   const uploadAvatar = useUploadAvatar();
@@ -34,8 +28,6 @@ export default function SettingsSection({ userEmail }: { userEmail: string }) {
   const [jobTitle, setJobTitle] = useState("");
   const [profileMessage, setProfileMessage] = useState("");
 
-  const [serviceName, setServiceName] = useState("");
-  const [servicePrice, setServicePrice] = useState("");
 
   const [newUserName, setNewUserName] = useState("");
   const [newUserEmail, setNewUserEmail] = useState("");
@@ -62,17 +54,6 @@ export default function SettingsSection({ userEmail }: { userEmail: string }) {
       job_title: jobTitle || null,
     });
     setProfileMessage("Perfil actualizado.");
-  };
-
-  const addService = async () => {
-    const name = serviceName.trim();
-    if (!name) return;
-    await createService.mutateAsync({
-      name,
-      defaultPriceUsd: servicePrice ? Number(servicePrice) : null,
-    });
-    setServiceName("");
-    setServicePrice("");
   };
 
   const createUser = async () => {
@@ -220,25 +201,7 @@ export default function SettingsSection({ userEmail }: { userEmail: string }) {
             </div>
           </section>
 
-          <section className="bg-slate-900 border border-slate-800 rounded-xl p-5">
-            <div className="mb-4"><h3 className="text-xs font-bold text-slate-300 uppercase tracking-wider">Servicios</h3></div>
-            <div className="grid grid-cols-[1fr_140px_auto] gap-2 mb-4">
-              <input value={serviceName} onChange={e => setServiceName(e.target.value)} placeholder="Nuevo servicio" className="bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-200 outline-none" />
-              <input type="number" min="0" step="0.01" value={servicePrice} onChange={e => setServicePrice(e.target.value)} placeholder="Precio USD" className="bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-200 outline-none" />
-              <button onClick={() => void addService()} disabled={createService.isPending} className="px-3 rounded-lg bg-blue-600 text-white grid place-items-center"><Plus size={14} /></button>
-            </div>
-            <div className="space-y-2">
-              {services.map(service => (
-                <div key={service.id} className="flex items-center gap-3 p-3 bg-slate-950 border border-slate-800 rounded-lg">
-                  <div className="flex-1"><p className="text-sm font-medium text-slate-200">{service.name}</p><p className="text-[11px] text-slate-600">{service.default_price_usd == null ? "Sin precio por defecto" : formatCurrency(Number(service.default_price_usd))}</p></div>
-                  <button onClick={() => void updateService.mutateAsync({ id: service.id, patch: { is_active: !service.is_active } })}
-                    className={`px-3 py-1.5 rounded-lg text-[10px] font-bold border ${service.is_active ? "text-emerald-400 bg-emerald-950 border-emerald-900" : "text-slate-500 bg-slate-800 border-slate-700"}`}>
-                    {service.is_active ? "Activo" : "Inactivo"}
-                  </button>
-                </div>
-              ))}
-            </div>
-          </section>
+          <ServiceManagement />
         </>
       )}
     </div>

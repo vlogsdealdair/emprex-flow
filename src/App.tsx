@@ -9,6 +9,9 @@ export default function App() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    const applyTheme = () => { const hour = new Date().getHours(); document.documentElement.dataset.theme = hour >= 7 && hour < 19 ? "light" : "dark"; };
+    applyTheme();
+    const themeTimer = window.setInterval(applyTheme, 60000);
     supabase.auth.getSession().then(({ data }: { data: { session: Session | null } }) => {
       setSession(data.session);
       setLoading(false);
@@ -16,11 +19,11 @@ export default function App() {
     const { data: listener } = supabase.auth.onAuthStateChange((_e: AuthChangeEvent, s: Session | null) => {
       setSession(s);
     });
-    return () => listener.subscription.unsubscribe();
+    return () => { listener.subscription.unsubscribe(); window.clearInterval(themeTimer); };
   }, []);
 
   if (loading) return (
-    <div className="min-h-screen bg-zinc-950 flex items-center justify-center">
+    <div className="min-h-screen crm-shell flex items-center justify-center">
       <div className="w-5 h-5 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
     </div>
   );

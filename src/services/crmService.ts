@@ -299,17 +299,20 @@ export async function markNotificationRead(id: string): Promise<void> {
   if (error) throw error;
 }
 
-export async function createService(input: { name: string; description?: string | null; defaultPriceUsd?: number | null }): Promise<void> {
+export async function createService(input: { name: string; description?: string | null; defaultPriceUsd?: number | null; pricingMinUsd?: number | null; pricingMaxUsd?: number | null; internalNotes?: string | null }): Promise<void> {
   const { error } = await supabase.from("services").insert({
     name: input.name.trim(),
     description: input.description || null,
     default_price_usd: input.defaultPriceUsd ?? null,
+    pricing_min_usd: input.pricingMinUsd ?? null,
+    pricing_max_usd: input.pricingMaxUsd ?? null,
+    internal_notes: input.internalNotes ?? null,
     is_active: true,
   });
   if (error) throw error;
 }
 
-export async function updateService(id: string, patch: { name?: string; description?: string | null; default_price_usd?: number | null; is_active?: boolean }): Promise<void> {
+export async function updateService(id: string, patch: { name?: string; description?: string | null; default_price_usd?: number | null; pricing_min_usd?: number | null; pricing_max_usd?: number | null; internal_notes?: string | null; is_active?: boolean }): Promise<void> {
   const { error } = await supabase.from("services").update(patch).eq("id", id);
   if (error) throw error;
 }
@@ -407,5 +410,69 @@ export async function upsertSalesTarget(input: {
     target_meetings: input.targetMeetings ?? null,
     target_wins: input.targetWins ?? null,
   }, { onConflict: "profile_id,period_start,period_end" });
+  if (error) throw error;
+}
+
+
+export type ToolLink = Tables<"tool_links">;
+export type CommissionRule = Tables<"commission_rules">;
+export type Commission = Tables<"commissions">;
+export type CommissionPayment = Tables<"commission_payments">;
+
+export type CommissionView = Commission & {
+  profile: Pick<Profile, "id" | "full_name" | "email" | "role">;
+  deal: (Deal & { contact: Contact }) | null;
+  payments: CommissionPayment[];
+};
+
+export async function fetchAllServices(): Promise<Service[]> {
+  const { data, error } = await supabase.from("services").select("*").order("name");
+  if (error) throw error;
+  return data ?? [];
+}
+
+export async function deleteService(id: string): Promise<void> {
+  const { error } = await supabase.from("services").delete().eq("id", id);
+  if (error) throw error;
+}
+
+export async function fetchToolLinks(): Promise<ToolLink[]> {
+  const { data, error } = await supabase.from("tool_links").select("*").order("position");
+  if (error) throw error;
+  return data ?? [];
+}
+
+export async function updateToolLink(id: string, patch: { name?: string; description?: string | null; url?: string; is_active?: boolean; position?: number }): Promise<void> {
+  const { error } = await supabase.from("tool_links").update(patch).eq("id", id);
+  if (error) throw error;
+}
+
+export async function fetchCommissionRules(): Promise<CommissionRule[]> {
+  const { data, error } = await supabase.from("commission_rules").select("*").order("role");
+  if (error) throw error;
+  return data ?? [];
+}
+
+export async function updateCommissionRule(id: string, patch: { calculation_type?: string; value?: number; is_active?: boolean; label?: string }): Promise<void> {
+  const { error } = await supabase.from("commission_rules").update(patch).eq("id", id);
+  if (error) throw error;
+}
+
+export async function fetchCommissions(): Promise<CommissionView[]> {
+  const { data, error } = await supabase
+    .from("commissions")
+    .select("*, profile:profiles!commissions_profile_id_fkey(id,full_name,email,role), deal:deals!commissions_deal_id_fkey(*, contact:contacts(*)), payments:commission_payments(*)")
+    .order("earned_at", { ascending: false });
+  if (error) throw error;
+  return (data ?? []) as unknown as CommissionView[];
+}
+
+export async function createCommissionPayment(input: { commissionId: string; amountUsd: number; note?: string | null; createdBy: string }): Promise<void> {
+  const { error } = await supabase.from("commission_payments").insert({
+    commission_id: input.commissionId,
+    amount_usd: input.amountUsd,
+    note: input.note || null,
+    created_by: input.createdBy,
+  });
   if (error) throw error;
 }
