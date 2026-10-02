@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
+import { useAppSettings } from "@/hooks/useCrm";
 
 const LOGIN_ALIASES: Record<string, string> = {
   leandroaldair: "vlogsdealdair@gmail.com",
@@ -8,6 +9,7 @@ const LOGIN_ALIASES: Record<string, string> = {
 };
 
 export default function Login() {
+  const { data: appSettings } = useAppSettings();
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -31,10 +33,10 @@ export default function Login() {
       style={{ fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif" }}>
       <div className="w-full max-w-sm">
         <div className="flex flex-col items-center mb-8">
-          <div className="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center mb-4">
-            <span className="text-base font-black text-white">E</span>
+          <div className="w-14 h-14 rounded-xl bg-blue-600 flex items-center justify-center mb-4 overflow-hidden">
+            {appSettings?.logo_url ? <img src={appSettings.logo_url} alt="EMPREX CRM" className="w-full h-full object-contain bg-white" /> : <span className="text-base font-black text-white">E</span>}
           </div>
-          <h1 className="text-xl font-bold text-white">Emprex CRM</h1>
+          <h1 className="text-xl font-bold text-white">EMPREX CRM</h1>
           <p className="text-xs text-slate-500 mt-1.5">Acceso restringido al equipo</p>
         </div>
 

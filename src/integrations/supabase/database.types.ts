@@ -69,6 +69,27 @@ export type Database = {
           },
         ]
       }
+      app_settings: {
+        Row: {
+          company_name: string
+          id: boolean
+          logo_url: string | null
+          updated_at: string
+        }
+        Insert: {
+          company_name?: string
+          id?: boolean
+          logo_url?: string | null
+          updated_at?: string
+        }
+        Update: {
+          company_name?: string
+          id?: boolean
+          logo_url?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       audit_log: {
         Row: {
           action: string
@@ -502,29 +523,38 @@ export type Database = {
       }
       profiles: {
         Row: {
+          avatar_url: string | null
           created_at: string
           email: string
           full_name: string
           id: string
           is_active: boolean
+          job_title: string | null
+          phone: string | null
           role: Database["public"]["Enums"]["app_role"]
           updated_at: string
         }
         Insert: {
+          avatar_url?: string | null
           created_at?: string
           email: string
           full_name: string
           id: string
           is_active?: boolean
+          job_title?: string | null
+          phone?: string | null
           role?: Database["public"]["Enums"]["app_role"]
           updated_at?: string
         }
         Update: {
+          avatar_url?: string | null
           created_at?: string
           email?: string
           full_name?: string
           id?: string
           is_active?: boolean
+          job_title?: string | null
+          phone?: string | null
           role?: Database["public"]["Enums"]["app_role"]
           updated_at?: string
         }
