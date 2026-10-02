@@ -191,7 +191,7 @@ export function useCreateService() {
   const qc = useQueryClient();
   return useMutation<void, Error, { name: string; description?: string | null; defaultPriceUsd?: number | null; pricingMinUsd?: number | null; pricingMaxUsd?: number | null; internalNotes?: string | null }>({
     mutationFn: createService,
-    onSuccess: () => qc.invalidateQueries({ queryKey: CRM_KEYS.services }),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: CRM_KEYS.services }); qc.invalidateQueries({ queryKey: CRM_KEYS.allServices }); },
   });
 }
 
