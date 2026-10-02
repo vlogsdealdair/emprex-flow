@@ -139,3 +139,9 @@ body { margin: 0; background: var(--crm-bg); color: var(--crm-text); }
 :root[data-theme="dark"] input,
 :root[data-theme="dark"] select,
 :root[data-theme="dark"] textarea { color-scheme: dark; }
+
+:root[data-theme="dark"] .bg-slate-950 { background-color: #07111f !important; }
+:root[data-theme="dark"] .bg-slate-900 { background-color: #0c1b2d !important; }
+:root[data-theme="dark"] .bg-slate-800 { background-color: #102237 !important; }
+:root[data-theme="dark"] .border-slate-800,
+:root[data-theme="dark"] .border-slate-700 { border-color: rgba(148,163,184,.13) !important; }
