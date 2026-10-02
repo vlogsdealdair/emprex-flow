@@ -319,3 +319,62 @@ export async function updateProfile(id: string, patch: { role?: "admin" | "sette
   const { error } = await supabase.from("profiles").update(patch).eq("id", id);
   if (error) throw error;
 }
+
+
+export async function createPayment(input: {
+  dealId: string;
+  amountUsd: number;
+  method: string;
+  paidAt?: string | null;
+  reference?: string | null;
+  notes?: string | null;
+  createdBy: string;
+}): Promise<void> {
+  const { error } = await supabase.from("payments").insert({
+    deal_id: input.dealId,
+    amount_usd: input.amountUsd,
+    method: input.method,
+    paid_at: input.paidAt || new Date().toISOString(),
+    reference: input.reference || null,
+    notes: input.notes || null,
+    created_by: input.createdBy,
+  });
+  if (error) throw error;
+}
+
+export async function logDealActivity(input: {
+  dealId: string;
+  contactId: string;
+  type: "call" | "whatsapp" | "email" | "meeting" | "note" | "stage_change" | "task" | "payment";
+  body: string;
+  createdBy: string;
+  metadata?: Record<string, string | number | boolean | null>;
+}): Promise<void> {
+  const { error } = await supabase.from("activities").insert({
+    deal_id: input.dealId,
+    contact_id: input.contactId,
+    type: input.type,
+    body: input.body,
+    metadata: input.metadata ?? {},
+    created_by: input.createdBy,
+  });
+  if (error) throw error;
+}
+
+export function googleCalendarUrl(input: {
+  title: string;
+  start: string;
+  durationMinutes?: number;
+  details?: string;
+}): string {
+  const start = new Date(input.start);
+  const end = new Date(start.getTime() + (input.durationMinutes ?? 30) * 60_000);
+  const format = (d: Date) => d.toISOString().replace(/[-:]/g, "").replace(/\.\d{3}Z$/, "Z");
+  const params = new URLSearchParams({
+    action: "TEMPLATE",
+    text: input.title,
+    dates: `${format(start)}/${format(end)}`,
+    details: input.details ?? "",
+  });
+  return `https://calendar.google.com/calendar/render?${params.toString()}`;
+}
