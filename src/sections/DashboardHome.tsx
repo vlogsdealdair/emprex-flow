@@ -1,4 +1,4 @@
-import { ArrowRight, CheckCircle2, Clock, TrendingUp, Users } from "lucide-react";
+import { AlertTriangle, ArrowRight, CheckCircle2, Clock, TrendingUp, Users } from "lucide-react";
 import { useDeals } from "@/hooks/useCrm";
 import { formatCurrency } from "@/utils/formatters";
 import type { Section } from "@/pages/Dashboard";
@@ -35,6 +35,7 @@ export default function DashboardHome({ onNavigate }: Props) {
   }, {})).sort((a, b) => b[1].total - a[1].total);
 
   const recent = deals.slice(0, 6);
+  const overdue = deals.filter(d => d.next_follow_up_at && new Date(d.next_follow_up_at).getTime() < Date.now() && !d.stage.is_won && !d.stage.is_lost).slice(0, 5);
 
   return (
     <div className="p-5 md:p-6 space-y-5 max-w-6xl mx-auto">
@@ -44,6 +45,31 @@ export default function DashboardHome({ onNavigate }: Props) {
         <KPI label="Leads Activos" value={String(active)} sub="en seguimiento" loading={isLoading} />
         <KPI label="Revenue Real" value={formatCurrency(revenue)} sub="ventas ganadas" loading={isLoading} />
       </div>
+
+      {overdue.length > 0 && (
+        <div className="bg-amber-950/10 border border-amber-900/50 rounded-xl p-5">
+          <div className="flex items-center justify-between mb-3">
+            <div>
+              <h2 className="text-sm font-bold text-amber-300 flex items-center gap-2"><AlertTriangle size={14} /> Requiere atención</h2>
+              <p className="text-xs text-amber-700 mt-0.5">Seguimientos vencidos que aún siguen activos.</p>
+            </div>
+            <button onClick={() => onNavigate("leads")} className="text-xs text-amber-400 flex items-center gap-1">Ir a Leads <ArrowRight size={11} /></button>
+          </div>
+          <div className="divide-y divide-amber-900/30">
+            {overdue.map(d => (
+              <div key={d.id} className="flex items-center gap-3 py-2.5">
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-slate-200 truncate">{d.contact.full_name}</p>
+                  <p className="text-[11px] text-slate-600 truncate">{d.next_action || "Seguimiento pendiente"}</p>
+                </div>
+                <span className="text-[11px] font-semibold text-amber-400">
+                  {new Date(d.next_follow_up_at!).toLocaleString("es-EC", { dateStyle: "short", timeStyle: "short" })}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="bg-slate-900 border border-slate-800 rounded-xl p-5">
         <div className="flex items-center justify-between mb-5">
