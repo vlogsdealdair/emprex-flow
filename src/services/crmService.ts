@@ -261,3 +261,55 @@ export async function toggleTaskComplete(task: Task): Promise<void> {
   const { error } = await supabase.from("tasks").update({ completed_at }).eq("id", task.id);
   if (error) throw error;
 }
+
+
+export type Client = Tables<"clients">;
+export type Notification = Tables<"notifications">;
+
+export type ClientView = Client & {
+  contact: Contact;
+  first_won_deal: Deal | null;
+};
+
+export async function fetchClients(): Promise<ClientView[]> {
+  const { data, error } = await supabase
+    .from("clients")
+    .select("*, contact:contacts(*), first_won_deal:deals!clients_first_won_deal_id_fkey(*)")
+    .eq("is_active", true)
+    .order("became_client_at", { ascending: false });
+  if (error) throw error;
+  return (data ?? []) as unknown as ClientView[];
+}
+
+export async function fetchNotifications(): Promise<Notification[]> {
+  const { data, error } = await supabase
+    .from("notifications")
+    .select("*")
+    .order("created_at", { ascending: false })
+    .limit(20);
+  if (error) throw error;
+  return data ?? [];
+}
+
+export async function markNotificationRead(id: string): Promise<void> {
+  const { error } = await supabase
+    .from("notifications")
+    .update({ read_at: new Date().toISOString() })
+    .eq("id", id);
+  if (error) throw error;
+}
+
+export async function createService(input: { name: string; description?: string | null; defaultPriceUsd?: number | null }): Promise<void> {
+  const { error } = await supabase.from("services").insert({
+    name: input.name.trim(),
+    description: input.description || null,
+    default_price_usd: input.defaultPriceUsd ?? null,
+    is_active: true,
+  });
+  if (error) throw error;
+}
+
+export async function updateService(id: string, patch: { name?: string; description?: string | null; default_price_usd?: number | null; is_active?: boolean }): Promise<void> {
+  const { error } = await supabase.from("services").update(patch).eq("id", id);
+  if (error) throw error;
+}
