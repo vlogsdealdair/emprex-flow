@@ -4,7 +4,7 @@ import {
   Settings, LogOut, Menu, X, ChevronRight, Wifi, ContactRound, BarChart3,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { useCurrentProfile } from "@/hooks/useCrm";
+import { useAppSettings, useCurrentProfile } from "@/hooks/useCrm";
 import DashboardHome from "@/sections/DashboardHome";
 import LeadsSection from "@/sections/LeadsSection";
 import TeamSection from "@/sections/TeamSection";
@@ -23,7 +23,7 @@ const NAV = [
   { id: "team" as Section, icon: UserSquare2, label: "Equipo", adminOnly: true },
   { id: "reports" as Section, icon: BarChart3, label: "Reportes", adminOnly: true },
   { id: "tools" as Section, icon: Wrench, label: "Herramientas" },
-  { id: "settings" as Section, icon: Settings, label: "Configuración", adminOnly: true },
+  { id: "settings" as Section, icon: Settings, label: "Configuración" },
 ];
 
 const TITLES: Record<Section, string> = {
@@ -35,6 +35,7 @@ export default function Dashboard() {
   const [section, setSection] = useState<Section>("home");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { data: profile, isLoading, error } = useCurrentProfile();
+  const { data: appSettings } = useAppSettings();
 
   if (isLoading) return <div className="min-h-screen bg-slate-950 grid place-items-center"><div className="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" /></div>;
   if (error || !profile) return <div className="min-h-screen bg-slate-950 grid place-items-center text-sm text-red-400">No se pudo cargar tu perfil de acceso.</div>;
@@ -49,8 +50,10 @@ export default function Dashboard() {
 
       <aside className={`fixed md:relative z-30 h-full flex flex-col w-56 bg-slate-950 border-r border-slate-800 transition-transform duration-200 ${sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}`}>
         <div className="flex items-center gap-2.5 px-4 h-14 border-b border-slate-800">
-          <div className="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center"><span className="text-xs font-black text-white">E</span></div>
-          <p className="text-sm font-bold text-white flex-1">Emprex CRM</p>
+          <div className="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center overflow-hidden">
+            {appSettings?.logo_url ? <img src={appSettings.logo_url} alt="EMPREX CRM" className="w-full h-full object-contain bg-white" /> : <span className="text-xs font-black text-white">E</span>}
+          </div>
+          <p className="text-sm font-bold text-white flex-1">EMPREX CRM</p>
           <button onClick={() => setSidebarOpen(false)} className="md:hidden text-slate-600"><X size={14} /></button>
         </div>
 
@@ -68,7 +71,9 @@ export default function Dashboard() {
 
         <div className="p-2 border-t border-slate-800">
           <div className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg group">
-            <div className="w-7 h-7 rounded-md bg-blue-600 grid place-items-center"><span className="text-[10px] font-bold">{initials}</span></div>
+            <div className="w-7 h-7 rounded-md bg-blue-600 grid place-items-center overflow-hidden">
+              {profile.avatar_url ? <img src={profile.avatar_url} alt="" className="w-full h-full object-cover" /> : <span className="text-[10px] font-bold">{initials}</span>}
+            </div>
             <div className="flex-1 min-w-0">
               <p className="text-xs font-semibold text-slate-300 truncate">{profile.full_name}</p>
               <p className="text-[10px] text-slate-600">{roleLabel}</p>
