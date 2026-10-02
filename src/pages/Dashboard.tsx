@@ -1,7 +1,7 @@
 import { useState } from "react";
 import {
   LayoutDashboard, Users, UserSquare2, Wrench,
-  Settings, LogOut, Menu, X, ChevronRight, Wifi, ContactRound,
+  Settings, LogOut, Menu, X, ChevronRight, Wifi, ContactRound, BarChart3,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentProfile } from "@/hooks/useCrm";
@@ -12,20 +12,22 @@ import ToolsSection from "@/sections/ToolsSection";
 import SettingsSection from "@/sections/SettingsSection";
 import ClientsSection from "@/sections/ClientsSection";
 import NotificationsBell from "@/components/NotificationsBell";
+import ReportsSection from "@/sections/ReportsSection";
 
-export type Section = "home" | "leads" | "clients" | "team" | "tools" | "settings";
+export type Section = "home" | "leads" | "clients" | "team" | "reports" | "tools" | "settings";
 
 const NAV = [
   { id: "home" as Section, icon: LayoutDashboard, label: "Dashboard" },
   { id: "leads" as Section, icon: Users, label: "Leads" },
   { id: "clients" as Section, icon: ContactRound, label: "Clientes" },
   { id: "team" as Section, icon: UserSquare2, label: "Equipo", adminOnly: true },
+  { id: "reports" as Section, icon: BarChart3, label: "Reportes", adminOnly: true },
   { id: "tools" as Section, icon: Wrench, label: "Herramientas" },
   { id: "settings" as Section, icon: Settings, label: "Configuración", adminOnly: true },
 ];
 
 const TITLES: Record<Section, string> = {
-  home: "Dashboard", leads: "Leads", clients: "Clientes", team: "Equipo",
+  home: "Dashboard", leads: "Leads", clients: "Clientes", team: "Equipo", reports: "Reportes",
   tools: "Herramientas", settings: "Configuración",
 };
 
@@ -89,6 +91,7 @@ export default function Dashboard() {
           {section === "leads" && <LeadsSection />}
           {section === "clients" && <ClientsSection />}
           {section === "team" && <TeamSection />}
+          {section === "reports" && <ReportsSection />}
           {section === "tools" && <ToolsSection />}
           {section === "settings" && <SettingsSection userEmail={profile.email} />}
         </main>

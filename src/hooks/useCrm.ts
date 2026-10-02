@@ -11,6 +11,8 @@ import {
   updateProfile,
   createPayment,
   logDealActivity,
+  fetchSalesTargets,
+  upsertSalesTarget,
   fetchDealActivities,
   fetchDealTasks,
   fetchDealPayments,
@@ -37,6 +39,7 @@ export const CRM_KEYS = {
   team: ["crm", "team"] as const,
   clients: ["crm", "clients"] as const,
   notifications: ["crm", "notifications"] as const,
+  targets: ["crm", "targets"] as const,
   activities: (dealId: string) => ["crm", "activities", dealId] as const,
   tasks: (dealId: string) => ["crm", "tasks", dealId] as const,
   payments: (dealId: string) => ["crm", "payments", dealId] as const,
@@ -230,5 +233,25 @@ export function useLogDealActivity() {
   }>({
     mutationFn: logDealActivity,
     onSuccess: (_, vars) => qc.invalidateQueries({ queryKey: CRM_KEYS.activities(vars.dealId) }),
+  });
+}
+
+
+export function useSalesTargets() {
+  return useQuery({ queryKey: CRM_KEYS.targets, queryFn: fetchSalesTargets, staleTime: 60_000 });
+}
+
+export function useUpsertSalesTarget() {
+  const qc = useQueryClient();
+  return useMutation<void, Error, {
+    profileId: string;
+    periodStart: string;
+    periodEnd: string;
+    targetRevenueUsd?: number | null;
+    targetMeetings?: number | null;
+    targetWins?: number | null;
+  }>({
+    mutationFn: upsertSalesTarget,
+    onSuccess: () => qc.invalidateQueries({ queryKey: CRM_KEYS.targets }),
   });
 }
