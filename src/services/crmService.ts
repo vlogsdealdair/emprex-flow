@@ -378,3 +378,34 @@ export function googleCalendarUrl(input: {
   });
   return `https://calendar.google.com/calendar/render?${params.toString()}`;
 }
+
+
+export type SalesTarget = Tables<"sales_targets">;
+
+export async function fetchSalesTargets(): Promise<SalesTarget[]> {
+  const { data, error } = await supabase
+    .from("sales_targets")
+    .select("*")
+    .order("period_start", { ascending: false });
+  if (error) throw error;
+  return data ?? [];
+}
+
+export async function upsertSalesTarget(input: {
+  profileId: string;
+  periodStart: string;
+  periodEnd: string;
+  targetRevenueUsd?: number | null;
+  targetMeetings?: number | null;
+  targetWins?: number | null;
+}): Promise<void> {
+  const { error } = await supabase.from("sales_targets").upsert({
+    profile_id: input.profileId,
+    period_start: input.periodStart,
+    period_end: input.periodEnd,
+    target_revenue_usd: input.targetRevenueUsd ?? null,
+    target_meetings: input.targetMeetings ?? null,
+    target_wins: input.targetWins ?? null,
+  }, { onConflict: "profile_id,period_start,period_end" });
+  if (error) throw error;
+}
