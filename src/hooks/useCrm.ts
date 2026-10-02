@@ -3,6 +3,10 @@ import {
   createDeal,
   deleteDeal,
   fetchCurrentProfile,
+  fetchDealActivities,
+  fetchDealTasks,
+  fetchDealPayments,
+  addDealNote,
   fetchDeals,
   fetchPipelineStages,
   fetchServices,
@@ -20,6 +24,9 @@ export const CRM_KEYS = {
   stages: ["crm", "stages"] as const,
   services: ["crm", "services"] as const,
   team: ["crm", "team"] as const,
+  activities: (dealId: string) => ["crm", "activities", dealId] as const,
+  tasks: (dealId: string) => ["crm", "tasks", dealId] as const,
+  payments: (dealId: string) => ["crm", "payments", dealId] as const,
 };
 
 export function useCurrentProfile() {
@@ -71,5 +78,38 @@ export function useDeleteDeal() {
   return useMutation<void, Error, DealView>({
     mutationFn: deleteDeal,
     onSuccess: () => qc.invalidateQueries({ queryKey: CRM_KEYS.deals }),
+  });
+}
+
+
+export function useDealActivities(dealId: string | null) {
+  return useQuery({
+    queryKey: CRM_KEYS.activities(dealId ?? "none"),
+    queryFn: () => fetchDealActivities(dealId!),
+    enabled: Boolean(dealId),
+  });
+}
+
+export function useDealTasks(dealId: string | null) {
+  return useQuery({
+    queryKey: CRM_KEYS.tasks(dealId ?? "none"),
+    queryFn: () => fetchDealTasks(dealId!),
+    enabled: Boolean(dealId),
+  });
+}
+
+export function useDealPayments(dealId: string | null) {
+  return useQuery({
+    queryKey: CRM_KEYS.payments(dealId ?? "none"),
+    queryFn: () => fetchDealPayments(dealId!),
+    enabled: Boolean(dealId),
+  });
+}
+
+export function useAddDealNote() {
+  const qc = useQueryClient();
+  return useMutation<void, Error, { dealId: string; contactId: string; body: string; profileId: string }>({
+    mutationFn: ({ dealId, contactId, body, profileId }) => addDealNote(dealId, contactId, body, profileId),
+    onSuccess: (_, vars) => qc.invalidateQueries({ queryKey: CRM_KEYS.activities(vars.dealId) }),
   });
 }
