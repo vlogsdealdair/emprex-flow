@@ -9,6 +9,8 @@ import {
   createService,
   updateService,
   updateProfile,
+  createPayment,
+  logDealActivity,
   fetchDealActivities,
   fetchDealTasks,
   fetchDealPayments,
@@ -193,5 +195,40 @@ export function useUpdateProfile() {
       qc.invalidateQueries({ queryKey: CRM_KEYS.team });
       qc.invalidateQueries({ queryKey: CRM_KEYS.profile });
     },
+  });
+}
+
+
+export function useCreatePayment() {
+  const qc = useQueryClient();
+  return useMutation<void, Error, {
+    dealId: string;
+    amountUsd: number;
+    method: string;
+    paidAt?: string | null;
+    reference?: string | null;
+    notes?: string | null;
+    createdBy: string;
+  }>({
+    mutationFn: createPayment,
+    onSuccess: (_, vars) => {
+      qc.invalidateQueries({ queryKey: CRM_KEYS.payments(vars.dealId) });
+      qc.invalidateQueries({ queryKey: CRM_KEYS.deals });
+    },
+  });
+}
+
+export function useLogDealActivity() {
+  const qc = useQueryClient();
+  return useMutation<void, Error, {
+    dealId: string;
+    contactId: string;
+    type: "call" | "whatsapp" | "email" | "meeting" | "note" | "stage_change" | "task" | "payment";
+    body: string;
+    createdBy: string;
+    metadata?: Record<string, string | number | boolean | null>;
+  }>({
+    mutationFn: logDealActivity,
+    onSuccess: (_, vars) => qc.invalidateQueries({ queryKey: CRM_KEYS.activities(vars.dealId) }),
   });
 }
