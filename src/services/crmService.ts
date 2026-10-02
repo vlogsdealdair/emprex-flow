@@ -180,3 +180,54 @@ export async function deleteDeal(view: DealView): Promise<void> {
 export function whatsappUrl(phone: string): string {
   return `https://wa.me/${phone.replace(/\D/g, "")}`;
 }
+
+
+export type Activity = Tables<"activities">;
+export type Task = Tables<"tasks">;
+export type Payment = Tables<"payments">;
+
+export type DealActivityView = Activity & {
+  creator: Pick<Profile, "id" | "full_name" | "email"> | null;
+};
+
+export async function fetchDealActivities(dealId: string): Promise<DealActivityView[]> {
+  const { data, error } = await supabase
+    .from("activities")
+    .select("*, creator:profiles!activities_created_by_fkey(id,full_name,email)")
+    .eq("deal_id", dealId)
+    .order("created_at", { ascending: false });
+  if (error) throw error;
+  return (data ?? []) as unknown as DealActivityView[];
+}
+
+export async function addDealNote(dealId: string, contactId: string, body: string, profileId: string): Promise<void> {
+  const { error } = await supabase.from("activities").insert({
+    deal_id: dealId,
+    contact_id: contactId,
+    type: "note",
+    body: body.trim(),
+    created_by: profileId,
+  });
+  if (error) throw error;
+}
+
+export async function fetchDealTasks(dealId: string): Promise<Task[]> {
+  const { data, error } = await supabase
+    .from("tasks")
+    .select("*")
+    .eq("deal_id", dealId)
+    .order("completed_at", { ascending: true, nullsFirst: true })
+    .order("due_at", { ascending: true, nullsFirst: false });
+  if (error) throw error;
+  return data ?? [];
+}
+
+export async function fetchDealPayments(dealId: string): Promise<Payment[]> {
+  const { data, error } = await supabase
+    .from("payments")
+    .select("*")
+    .eq("deal_id", dealId)
+    .order("paid_at", { ascending: false });
+  if (error) throw error;
+  return data ?? [];
+}
