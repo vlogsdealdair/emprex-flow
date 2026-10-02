@@ -1,7 +1,7 @@
 import { useState } from "react";
 import {
   CalendarClock, CheckCircle2, Circle, Clock3, Mail, MessageCircle,
-  StickyNote, X, Phone, BriefcaseBusiness, Plus
+  StickyNote, X, Phone, BriefcaseBusiness, Plus, DollarSign, CalendarPlus
 } from "lucide-react";
 import {
   useAddDealNote,
@@ -9,9 +9,12 @@ import {
   useCurrentProfile,
   useDealActivities,
   useDealTasks,
+  useDealPayments,
   useToggleTaskComplete,
+  useCreatePayment,
+  useLogDealActivity,
 } from "@/hooks/useCrm";
-import { whatsappUrl, type DealView } from "@/services/crmService";
+import { googleCalendarUrl, whatsappUrl, type DealView } from "@/services/crmService";
 import { formatCurrency } from "@/utils/formatters";
 
 export default function DealDetailPanel({ deal, onClose, onEdit }: {
@@ -22,13 +25,18 @@ export default function DealDetailPanel({ deal, onClose, onEdit }: {
   const { data: profile } = useCurrentProfile();
   const { data: activities = [] } = useDealActivities(deal.id);
   const { data: tasks = [] } = useDealTasks(deal.id);
+  const { data: payments = [] } = useDealPayments(deal.id);
   const addNote = useAddDealNote();
   const createTask = useCreateDealTask();
   const toggleTask = useToggleTaskComplete();
+  const createPayment = useCreatePayment();
+  const logActivity = useLogDealActivity();
 
   const [note, setNote] = useState("");
   const [taskTitle, setTaskTitle] = useState("");
   const [taskDue, setTaskDue] = useState("");
+  const [paymentAmount, setPaymentAmount] = useState("");
+  const [paymentMethod, setPaymentMethod] = useState("Transferencia");
 
   if (!profile) return null;
 
@@ -54,6 +62,47 @@ export default function DealDetailPanel({ deal, onClose, onEdit }: {
     setTaskTitle("");
     setTaskDue("");
   };
+
+  const submitPayment = async () => {
+    const amount = Number(paymentAmount);
+    if (!amount || amount <= 0) return;
+    await createPayment.mutateAsync({
+      dealId: deal.id,
+      amountUsd: amount,
+      method: paymentMethod,
+      createdBy: profile.id,
+    });
+    await logActivity.mutateAsync({
+      dealId: deal.id,
+      contactId: deal.contact_id,
+      type: "payment",
+      body: `Pago registrado: ${formatCurrency(amount)} vía ${paymentMethod}`,
+      createdBy: profile.id,
+    });
+    setPaymentAmount("");
+  };
+
+  const logInteraction = (type: "whatsapp" | "email" | "meeting", body: string) => {
+    void logActivity.mutateAsync({
+      dealId: deal.id,
+      contactId: deal.contact_id,
+      type,
+      body,
+      createdBy: profile.id,
+    });
+  };
+
+  const paidTotal = payments.reduce((sum, p) => sum + Number(p.amount_usd || 0), 0);
+  const expectedTotal = Number(deal.actual_value_usd ?? deal.potential_value_usd ?? 0);
+  const pendingTotal = Math.max(0, expectedTotal - paidTotal);
+  const canManagePayments = profile.role === "admin" || profile.role === "closer";
+  const calendarHref = deal.next_follow_up_at
+    ? googleCalendarUrl({
+        title: `Seguimiento — ${deal.contact.full_name}`,
+        start: deal.next_follow_up_at,
+        details: `${deal.service?.name || "Oportunidad EMPREX"} · ${deal.next_action || "Seguimiento comercial"}`,
+      })
+    : null;
 
   const activityIcon = (type: string) => {
     if (type === "note") return <StickyNote size={13} />;
@@ -88,16 +137,62 @@ export default function DealDetailPanel({ deal, onClose, onEdit }: {
 
             <div className="mt-3 flex flex-wrap gap-2">
               {deal.contact.phone_e164 && (
-                <a href={whatsappUrl(deal.contact.phone_e164)} target="_blank" rel="noreferrer"
+                <a href={whatsappUrl(deal.contact.phone_e164)} target="_blank" rel="noreferrer" onClick={() => logInteraction("whatsapp", "Conversación de WhatsApp abierta")}
                   className="px-3 py-2 rounded-lg bg-emerald-950 border border-emerald-900 text-emerald-400 text-xs font-semibold inline-flex items-center gap-1.5">
                   <MessageCircle size={13} /> Abrir WhatsApp
                 </a>
               )}
               {deal.contact.email && (
-                <a href={`mailto:${deal.contact.email}`} className="px-3 py-2 rounded-lg bg-slate-900 border border-slate-800 text-slate-300 text-xs inline-flex items-center gap-1.5">
+                <a href={`mailto:${deal.contact.email}?subject=${encodeURIComponent(`Seguimiento EMPREX — ${deal.contact.full_name}`)}`} onClick={() => logInteraction("email", "Email abierto desde el CRM")} className="px-3 py-2 rounded-lg bg-slate-900 border border-slate-800 text-slate-300 text-xs inline-flex items-center gap-1.5">
                   <Mail size={13} /> Email
                 </a>
               )}
+              {calendarHref && (
+                <a href={calendarHref} target="_blank" rel="noreferrer"
+                  onClick={() => logInteraction("meeting", "Seguimiento abierto en Google Calendar")}
+                  className="px-3 py-2 rounded-lg bg-slate-900 border border-slate-800 text-slate-300 text-xs inline-flex items-center gap-1.5">
+                  <CalendarPlus size={13} /> Google Calendar
+                </a>
+              )}
+            </div>
+          </section>
+
+          <section className="p-5 border-b border-slate-800">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-xs font-bold text-slate-300 uppercase tracking-wider">Finanzas</h3>
+              <span className="text-[10px] text-slate-600">{payments.length} pagos</span>
+            </div>
+
+            <div className="grid grid-cols-3 gap-2 mb-3">
+              <Money label="Venta" value={expectedTotal} />
+              <Money label="Pagado" value={paidTotal} />
+              <Money label="Pendiente" value={pendingTotal} />
+            </div>
+
+            {canManagePayments && (
+              <div className="grid grid-cols-[1fr_150px_auto] gap-2 mb-3">
+                <input type="number" min="0.01" step="0.01" value={paymentAmount} onChange={e => setPaymentAmount(e.target.value)} placeholder="Monto USD"
+                  className="bg-slate-900 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-200 outline-none" />
+                <select value={paymentMethod} onChange={e => setPaymentMethod(e.target.value)}
+                  className="bg-slate-900 border border-slate-800 rounded-lg px-2 py-2 text-xs text-slate-400 outline-none">
+                  {["Transferencia","Tarjeta","Efectivo","PayPal","Stripe","Otro"].map(m => <option key={m} value={m}>{m}</option>)}
+                </select>
+                <button onClick={() => void submitPayment()} disabled={createPayment.isPending}
+                  className="w-9 rounded-lg bg-emerald-700 grid place-items-center text-white disabled:opacity-50"><DollarSign size={14} /></button>
+              </div>
+            )}
+
+            <div className="space-y-2">
+              {payments.slice(0, 6).map(payment => (
+                <div key={payment.id} className="flex items-center justify-between bg-slate-900 border border-slate-800 rounded-lg px-3 py-2">
+                  <div>
+                    <p className="text-xs font-semibold text-slate-200">{payment.method}</p>
+                    <p className="text-[10px] text-slate-600">{new Date(payment.paid_at).toLocaleDateString("es-EC")}</p>
+                  </div>
+                  <span className="text-sm font-bold text-emerald-400">{formatCurrency(Number(payment.amount_usd))}</span>
+                </div>
+              ))}
+              {payments.length === 0 && <p className="text-xs text-slate-600">No hay pagos registrados.</p>}
             </div>
           </section>
 
@@ -168,6 +263,16 @@ function Info({ label, value, icon }: { label: string; value: string; icon: Reac
     <div className="bg-slate-900 border border-slate-800 rounded-lg p-3">
       <div className="flex items-center gap-1.5 text-[10px] text-slate-600 uppercase tracking-wider mb-1">{icon}{label}</div>
       <p className="text-xs text-slate-200 truncate">{value}</p>
+    </div>
+  );
+}
+
+
+function Money({ label, value }: { label: string; value: number }) {
+  return (
+    <div className="bg-slate-900 border border-slate-800 rounded-lg p-3">
+      <p className="text-[10px] text-slate-600 uppercase tracking-wider">{label}</p>
+      <p className="text-sm font-bold text-white mt-1">{formatCurrency(value)}</p>
     </div>
   );
 }
