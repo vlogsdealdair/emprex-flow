@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { CalendarClock, Edit2, KanbanSquare, List, MessageCircle, Plus, Search, Trash2, Users } from "lucide-react";
 import LeadModal from "@/components/LeadModal";
+import DealDetailPanel from "@/components/DealDetailPanel";
 import {
   useCreateDeal,
   useCurrentProfile,
@@ -32,6 +33,7 @@ export default function LeadsSection() {
   const [search, setSearch] = useState("");
   const [stageFilter, setStageFilter] = useState("all");
   const [modal, setModal] = useState<{ open: boolean; deal: DealView | null }>({ open: false, deal: null });
+  const [selected, setSelected] = useState<DealView | null>(null);
 
   const visibleTeam = profile?.role === "admin" ? team : profile ? [profile] : [];
 
@@ -105,9 +107,17 @@ export default function LeadsSection() {
       {isLoading ? (
         <div className="h-64 bg-slate-900 border border-slate-800 rounded-xl animate-pulse" />
       ) : view === "kanban" ? (
-        <Kanban deals={filtered} stages={stages} onMove={move} onEdit={deal => setModal({ open: true, deal })} />
+        <Kanban deals={filtered} stages={stages} onMove={move} onOpen={setSelected} />
       ) : (
-        <DealsTable deals={filtered} stages={stages} isAdmin={profile.role === "admin"} onMove={move} onEdit={deal => setModal({ open: true, deal })} onDelete={remove} />
+        <DealsTable deals={filtered} stages={stages} isAdmin={profile.role === "admin"} onMove={move} onOpen={setSelected} onEdit={deal => setModal({ open: true, deal })} onDelete={remove} />
+      )}
+
+      {selected && (
+        <DealDetailPanel
+          deal={selected}
+          onClose={() => setSelected(null)}
+          onEdit={() => { setModal({ open: true, deal: selected }); setSelected(null); }}
+        />
       )}
 
       <LeadModal
@@ -125,11 +135,11 @@ export default function LeadsSection() {
   );
 }
 
-function Kanban({ deals, stages, onMove, onEdit }: {
+function Kanban({ deals, stages, onMove, onOpen }: {
   deals: DealView[];
   stages: { id: string; name: string; position: number }[];
   onMove: (dealId: string, stageId: string) => Promise<void>;
-  onEdit: (deal: DealView) => void;
+  onOpen: (deal: DealView) => void;
 }) {
   return (
     <div className="overflow-x-auto pb-3">
@@ -154,7 +164,7 @@ function Kanban({ deals, stages, onMove, onEdit }: {
               </div>
               <div className="p-2 space-y-2 min-h-40">
                 {stageDeals.map(deal => (
-                  <DealCard key={deal.id} deal={deal} onEdit={() => onEdit(deal)} />
+                  <DealCard key={deal.id} deal={deal} onOpen={() => onOpen(deal)} />
                 ))}
                 {stageDeals.length === 0 && <div className="border border-dashed border-slate-800 rounded-lg py-8 text-center text-[11px] text-slate-700">Arrastra un lead aquí</div>}
               </div>
@@ -166,13 +176,13 @@ function Kanban({ deals, stages, onMove, onEdit }: {
   );
 }
 
-function DealCard({ deal, onEdit }: { deal: DealView; onEdit: () => void }) {
+function DealCard({ deal, onOpen }: { deal: DealView; onOpen: () => void }) {
   return (
     <article draggable
       onDragStart={e => e.dataTransfer.setData("text/deal-id", deal.id)}
       className="bg-slate-950 border border-slate-800 rounded-lg p-3 cursor-grab active:cursor-grabbing hover:border-slate-700">
       <div className="flex gap-2 items-start">
-        <button onClick={onEdit} className="text-left flex-1 min-w-0">
+        <button onClick={onOpen} className="text-left flex-1 min-w-0">
           <p className="text-sm font-semibold text-slate-200 truncate">{deal.contact.full_name}</p>
           <p className="text-[11px] text-slate-600 truncate mt-0.5">{deal.service?.name || "Sin servicio"}</p>
         </button>
@@ -198,11 +208,12 @@ function DealCard({ deal, onEdit }: { deal: DealView; onEdit: () => void }) {
   );
 }
 
-function DealsTable({ deals, stages, isAdmin, onMove, onEdit, onDelete }: {
+function DealsTable({ deals, stages, isAdmin, onMove, onOpen, onEdit, onDelete }: {
   deals: DealView[];
   stages: { id: string; name: string }[];
   isAdmin: boolean;
   onMove: (dealId: string, stageId: string) => Promise<void>;
+  onOpen: (deal: DealView) => void;
   onEdit: (deal: DealView) => void;
   onDelete: (deal: DealView) => Promise<void>;
 }) {
@@ -220,7 +231,7 @@ function DealsTable({ deals, stages, isAdmin, onMove, onEdit, onDelete }: {
           {deals.map(deal => (
             <tr key={deal.id} className="hover:bg-slate-800/20">
               <td className="px-4 py-3">
-                <p className="text-sm font-semibold text-slate-200">{deal.contact.full_name}</p>
+                <button onClick={() => onOpen(deal)} className="text-left"><p className="text-sm font-semibold text-slate-200 hover:text-blue-400">{deal.contact.full_name}</p></button>
                 <p className="text-[11px] text-slate-600">{deal.contact.company || deal.contact.email || "—"}</p>
               </td>
               <td className="px-4 py-3">
