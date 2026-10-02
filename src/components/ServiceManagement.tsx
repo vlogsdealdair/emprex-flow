@@ -1,0 +1,39 @@
+import { useState } from "react";
+import { Calculator, Edit3, Plus, Save, Trash2 } from "lucide-react";
+import { useAllServices, useCreateService, useDeleteService, useUpdateService } from "@/hooks/useCrm";
+import { formatCurrency } from "@/utils/formatters";
+
+type Draft={name:string;description:string;base:string;min:string;max:string;notes:string};
+const blank:Draft={name:"",description:"",base:"",min:"",max:"",notes:""};
+
+export default function ServiceManagement(){
+  const {data:services=[]}=useAllServices();
+  const createService=useCreateService(); const updateService=useUpdateService(); const deleteService=useDeleteService();
+  const [newDraft,setNewDraft]=useState<Draft>(blank);
+  const [editing,setEditing]=useState<string|null>(null);
+  const [drafts,setDrafts]=useState<Record<string,Draft>>({});
+
+  const makeDraft=(s:any):Draft=>({name:s.name,description:s.description||"",base:s.default_price_usd==null?"":String(s.default_price_usd),min:s.pricing_min_usd==null?"":String(s.pricing_min_usd),max:s.pricing_max_usd==null?"":String(s.pricing_max_usd),notes:s.internal_notes||""});
+  const create=async()=>{if(!newDraft.name.trim())return;await createService.mutateAsync({name:newDraft.name,description:newDraft.description||null,defaultPriceUsd:newDraft.base?Number(newDraft.base):null,pricingMinUsd:newDraft.min?Number(newDraft.min):null,pricingMaxUsd:newDraft.max?Number(newDraft.max):null,internalNotes:newDraft.notes||null});setNewDraft(blank);};
+  const save=async(id:string)=>{const d=drafts[id];if(!d)return;await updateService.mutateAsync({id,patch:{name:d.name,description:d.description||null,default_price_usd:d.base?Number(d.base):null,pricing_min_usd:d.min?Number(d.min):null,pricing_max_usd:d.max?Number(d.max):null,internal_notes:d.notes||null}});setEditing(null);};
+
+  return <section className="crm-card rounded-2xl p-5">
+    <div className="flex items-start justify-between gap-3 mb-5"><div><h3 className="text-sm font-bold crm-text">Servicios</h3><p className="text-xs crm-muted mt-1">Precios, información comercial y simulación de rango de cobro.</p></div><Calculator size={18} className="crm-accent"/></div>
+    <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-3 p-4 rounded-xl border crm-border bg-white/5">
+      <input placeholder="Nombre del servicio" value={newDraft.name} onChange={e=>setNewDraft(p=>({...p,name:e.target.value}))} className="rounded-lg border crm-border bg-transparent px-3 py-2 text-xs crm-text"/>
+      <input placeholder="Precio base USD" type="number" min="0" value={newDraft.base} onChange={e=>setNewDraft(p=>({...p,base:e.target.value}))} className="rounded-lg border crm-border bg-transparent px-3 py-2 text-xs crm-text"/>
+      <input placeholder="Mínimo sugerido" type="number" min="0" value={newDraft.min} onChange={e=>setNewDraft(p=>({...p,min:e.target.value}))} className="rounded-lg border crm-border bg-transparent px-3 py-2 text-xs crm-text"/>
+      <input placeholder="Máximo sugerido" type="number" min="0" value={newDraft.max} onChange={e=>setNewDraft(p=>({...p,max:e.target.value}))} className="rounded-lg border crm-border bg-transparent px-3 py-2 text-xs crm-text"/>
+      <input placeholder="Descripción comercial" value={newDraft.description} onChange={e=>setNewDraft(p=>({...p,description:e.target.value}))} className="rounded-lg border crm-border bg-transparent px-3 py-2 text-xs crm-text"/>
+      <button onClick={()=>void create()} className="rounded-lg bg-[var(--crm-accent)] text-white text-xs font-semibold flex items-center justify-center gap-1.5"><Plus size={13}/> Crear servicio</button>
+    </div>
+
+    <div className="grid lg:grid-cols-2 gap-4 mt-5">{services.map(service=>{const draft=drafts[service.id]||makeDraft(service);const isEdit=editing===service.id;const min=Number(draft.min||0),base=Number(draft.base||0),max=Number(draft.max||0);return <article key={service.id} className="rounded-2xl border crm-border p-4 bg-white/5"><div className="flex items-start gap-3"><div className="flex-1 min-w-0">{isEdit?<input value={draft.name} onChange={e=>setDrafts(p=>({...p,[service.id]:{...draft,name:e.target.value}}))} className="w-full bg-transparent border crm-border rounded-lg px-2 py-1.5 text-sm font-bold crm-text"/>:<><h4 className="text-sm font-bold crm-text">{service.name}</h4><p className="text-xs crm-muted mt-1">{service.description||"Sin descripción comercial."}</p></>}</div><span className={service.is_active?"text-[10px] font-bold px-2 py-1 rounded-full bg-emerald-500/10 text-emerald-500":"text-[10px] font-bold px-2 py-1 rounded-full bg-amber-500/10 text-amber-500"}>{service.is_active?"Activo":"Suspendido"}</span></div>
+      {isEdit?<div className="grid grid-cols-2 gap-2 mt-4"><textarea rows={2} value={draft.description} onChange={e=>setDrafts(p=>({...p,[service.id]:{...draft,description:e.target.value}}))} placeholder="Descripción" className="col-span-2 bg-transparent border crm-border rounded-lg p-2 text-xs crm-text resize-none"/><input type="number" value={draft.base} onChange={e=>setDrafts(p=>({...p,[service.id]:{...draft,base:e.target.value}}))} placeholder="Precio base" className="bg-transparent border crm-border rounded-lg p-2 text-xs crm-text"/><input type="number" value={draft.min} onChange={e=>setDrafts(p=>({...p,[service.id]:{...draft,min:e.target.value}}))} placeholder="Mínimo" className="bg-transparent border crm-border rounded-lg p-2 text-xs crm-text"/><input type="number" value={draft.max} onChange={e=>setDrafts(p=>({...p,[service.id]:{...draft,max:e.target.value}}))} placeholder="Máximo" className="bg-transparent border crm-border rounded-lg p-2 text-xs crm-text"/><input value={draft.notes} onChange={e=>setDrafts(p=>({...p,[service.id]:{...draft,notes:e.target.value}}))} placeholder="Información interna" className="bg-transparent border crm-border rounded-lg p-2 text-xs crm-text"/></div>:<div className="grid grid-cols-3 gap-2 mt-4"><Price label="Mínimo" value={Number(service.pricing_min_usd||0)}/><Price label="Base" value={Number(service.default_price_usd||0)} strong/><Price label="Máximo" value={Number(service.pricing_max_usd||0)}/></div>}
+      <div className="mt-4 p-3 rounded-xl bg-[var(--crm-glow)]"><p className="text-[10px] uppercase tracking-wider crm-muted">Simulación comercial</p><p className="text-xs crm-text mt-1">{max>0||Number(service.pricing_max_usd||0)>0?"Puedes cotizar aproximadamente entre "+formatCurrency(isEdit?min:Number(service.pricing_min_usd||0))+" y "+formatCurrency(isEdit?max:Number(service.pricing_max_usd||0))+".":"Configura mínimo y máximo para activar la simulación."}</p></div>
+      <div className="flex flex-wrap gap-2 mt-4">{isEdit?<button onClick={()=>void save(service.id)} className="px-3 py-2 rounded-lg bg-[var(--crm-accent)] text-white text-xs font-semibold flex items-center gap-1.5"><Save size={12}/> Guardar</button>:<button onClick={()=>{setDrafts(p=>({...p,[service.id]:makeDraft(service)}));setEditing(service.id)}} className="px-3 py-2 rounded-lg border crm-border text-xs crm-text flex items-center gap-1.5"><Edit3 size={12}/> Editar</button>}<button onClick={()=>void updateService.mutateAsync({id:service.id,patch:{is_active:!service.is_active}})} className="px-3 py-2 rounded-lg border crm-border text-xs crm-muted">{service.is_active?"Suspender":"Activar"}</button><button onClick={()=>{if(window.confirm("¿Eliminar este servicio?"))void deleteService.mutateAsync(service.id)}} className="px-3 py-2 rounded-lg border border-red-500/20 text-red-500 text-xs flex items-center gap-1.5"><Trash2 size={12}/> Eliminar</button></div>
+    </article>})}</div>
+  </section>;
+}
+
+function Price({label,value,strong=false}:{label:string;value:number;strong?:boolean}){return <div className="rounded-xl border crm-border p-3"><p className="text-[10px] crm-muted uppercase">{label}</p><p className={(strong?"text-lg ":"text-sm ")+"font-bold crm-text mt-1"}>{value?formatCurrency(value):"—"}</p></div>;}
