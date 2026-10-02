@@ -8,6 +8,7 @@ import {
   markNotificationRead,
   createService,
   updateService,
+  updateProfile,
   fetchDealActivities,
   fetchDealTasks,
   fetchDealPayments,
@@ -180,5 +181,17 @@ export function useUpdateService() {
   return useMutation<void, Error, { id: string; patch: { name?: string; description?: string | null; default_price_usd?: number | null; is_active?: boolean } }>({
     mutationFn: ({ id, patch }) => updateService(id, patch),
     onSuccess: () => qc.invalidateQueries({ queryKey: CRM_KEYS.services }),
+  });
+}
+
+
+export function useUpdateProfile() {
+  const qc = useQueryClient();
+  return useMutation<void, Error, { id: string; patch: { role?: "admin" | "setter" | "closer"; is_active?: boolean; full_name?: string } }>({
+    mutationFn: ({ id, patch }) => updateProfile(id, patch),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: CRM_KEYS.team });
+      qc.invalidateQueries({ queryKey: CRM_KEYS.profile });
+    },
   });
 }
