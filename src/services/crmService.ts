@@ -313,3 +313,9 @@ export async function updateService(id: string, patch: { name?: string; descript
   const { error } = await supabase.from("services").update(patch).eq("id", id);
   if (error) throw error;
 }
+
+
+export async function updateProfile(id: string, patch: { role?: "admin" | "setter" | "closer"; is_active?: boolean; full_name?: string }): Promise<void> {
+  const { error } = await supabase.from("profiles").update(patch).eq("id", id);
+  if (error) throw error;
+}
