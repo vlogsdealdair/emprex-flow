@@ -177,10 +177,11 @@ function Kanban({ deals, stages, onMove, onOpen }: {
 }
 
 function DealCard({ deal, onOpen }: { deal: DealView; onOpen: () => void }) {
+  const overdue = Boolean(deal.next_follow_up_at && new Date(deal.next_follow_up_at).getTime() < Date.now() && !deal.stage.is_won && !deal.stage.is_lost);
   return (
     <article draggable
       onDragStart={e => e.dataTransfer.setData("text/deal-id", deal.id)}
-      className="bg-slate-950 border border-slate-800 rounded-lg p-3 cursor-grab active:cursor-grabbing hover:border-slate-700">
+      className={`bg-slate-950 border rounded-lg p-3 cursor-grab active:cursor-grabbing ${overdue ? "border-amber-800/70" : "border-slate-800 hover:border-slate-700"}`}>
       <div className="flex gap-2 items-start">
         <button onClick={onOpen} className="text-left flex-1 min-w-0">
           <p className="text-sm font-semibold text-slate-200 truncate">{deal.contact.full_name}</p>
@@ -196,7 +197,7 @@ function DealCard({ deal, onOpen }: { deal: DealView; onOpen: () => void }) {
           </a>
         )}
         {deal.next_follow_up_at && (
-          <span className="ml-auto inline-flex items-center gap-1 text-[10px] text-slate-500">
+          <span className={`ml-auto inline-flex items-center gap-1 text-[10px] ${overdue ? "text-amber-400 font-semibold" : "text-slate-500"}`}>
             <CalendarClock size={11} /> {new Date(deal.next_follow_up_at).toLocaleDateString("es-EC")}
           </span>
         )}
@@ -228,8 +229,10 @@ function DealsTable({ deals, stages, isAdmin, onMove, onOpen, onEdit, onDelete }
           <tr>{["Prospecto", "WhatsApp", "Servicio", "Valor", "Responsable", "Etapa", "Seguimiento", ""].map(h => <th key={h} className="px-4 py-3 text-left text-[10px] uppercase tracking-wider text-slate-500">{h}</th>)}</tr>
         </thead>
         <tbody className="divide-y divide-slate-800/60">
-          {deals.map(deal => (
-            <tr key={deal.id} className="hover:bg-slate-800/20">
+          {deals.map(deal => {
+            const overdue = Boolean(deal.next_follow_up_at && new Date(deal.next_follow_up_at).getTime() < Date.now() && !deal.stage.is_won && !deal.stage.is_lost);
+            return (
+            <tr key={deal.id} className={overdue ? "bg-amber-950/10 hover:bg-amber-950/20" : "hover:bg-slate-800/20"}>
               <td className="px-4 py-3">
                 <button onClick={() => onOpen(deal)} className="text-left"><p className="text-sm font-semibold text-slate-200 hover:text-blue-400">{deal.contact.full_name}</p></button>
                 <p className="text-[11px] text-slate-600">{deal.contact.company || deal.contact.email || "—"}</p>
@@ -247,7 +250,7 @@ function DealsTable({ deals, stages, isAdmin, onMove, onOpen, onEdit, onDelete }
                 </select>
               </td>
               <td className="px-4 py-3 text-xs text-slate-500">
-                {deal.next_follow_up_at ? new Date(deal.next_follow_up_at).toLocaleString("es-EC", { dateStyle: "short", timeStyle: "short" }) : "—"}
+                {deal.next_follow_up_at ? <span className={overdue ? "text-amber-400 font-semibold" : ""}>{new Date(deal.next_follow_up_at).toLocaleString("es-EC", { dateStyle: "short", timeStyle: "short" })}{overdue ? " · Vencido" : ""}</span> : "—"}
               </td>
               <td className="px-4 py-3">
                 <div className="flex gap-1">
@@ -256,7 +259,8 @@ function DealsTable({ deals, stages, isAdmin, onMove, onOpen, onEdit, onDelete }
                 </div>
               </td>
             </tr>
-          ))}
+            );
+          })}
         </tbody>
       </table>
     </div>
