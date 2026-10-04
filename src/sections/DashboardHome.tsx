@@ -1,4 +1,4 @@
-import { AlertTriangle, ArrowRight, CheckCircle2, CircleDollarSign, Target, TrendingDown, TrendingUp, Users } from "lucide-react";
+import { ArrowRight, CalendarCheck2, CheckCircle2, CircleDollarSign, Target, TrendingUp, Users } from "lucide-react";
 import { useCommissions, useCurrentProfile, useDeals } from "@/hooks/useCrm";
 import { formatCurrency } from "@/utils/formatters";
 import type { Section } from "@/pages/Dashboard";
@@ -9,81 +9,99 @@ export default function DashboardHome({ onNavigate }: Props) {
   const { data: profile } = useCurrentProfile();
   const { data: deals = [], isLoading } = useDeals();
   const { data: commissions = [] } = useCommissions();
-
   if (!profile) return null;
+
+  const wonDeals = deals.filter(d => d.stage.is_won);
+  const activeDeals = deals.filter(d => !d.stage.is_won && !d.stage.is_lost);
   const total = deals.length;
-  const won = deals.filter(d => d.stage.is_won).length;
-  const lost = deals.filter(d => d.stage.is_lost).length;
-  const active = total - won - lost;
+  const won = wonDeals.length;
+  const active = activeDeals.length;
   const conversion = total ? Math.round((won / total) * 100) : 0;
-  const pipeline = deals.filter(d => !d.stage.is_lost).reduce((s,d)=>s+Number(d.potential_value_usd||0),0);
-  const revenue = deals.filter(d => d.stage.is_won).reduce((s,d)=>s+Number(d.actual_value_usd ?? d.potential_value_usd ?? 0),0);
-  const ownCommissions = profile.role === "admin" ? commissions : commissions.filter(c => c.profile_id === profile.id);
-  const commissionEarned = ownCommissions.reduce((s,c)=>s+Number(c.commission_amount_usd||0),0);
-  const commissionPaid = ownCommissions.reduce((s,c)=>s+c.payments.reduce((x,p)=>x+Number(p.amount_usd||0),0),0);
-  const commissionPending = Math.max(0, commissionEarned - commissionPaid);
-  const overdue = deals.filter(d => d.next_follow_up_at && new Date(d.next_follow_up_at).getTime() < Date.now() && !d.stage.is_won && !d.stage.is_lost).slice(0,5);
+  const pipeline = activeDeals.reduce((sum,d)=>sum+Number(d.potential_value_usd||0),0);
+  const revenue = wonDeals.reduce((sum,d)=>sum+Number(d.actual_value_usd ?? d.potential_value_usd ?? 0),0);
+  const own = profile.role === "admin" ? commissions : commissions.filter(c => c.profile_id === profile.id);
+  const earned = own.reduce((sum,c)=>sum+Number(c.commission_amount_usd||0),0);
+  const paid = own.reduce((sum,c)=>sum+c.payments.reduce((x,p)=>x+Number(p.amount_usd||0),0),0);
+  const pending = Math.max(0,earned-paid);
+  const meetings = deals.filter(d=>d.stage.name.toLowerCase().includes("reunión")).length;
+  const contacted = deals.filter(d=>!d.stage.name.toLowerCase().includes("nuevo")).length;
+  const overdue = activeDeals.filter(d=>d.next_follow_up_at && new Date(d.next_follow_up_at).getTime()<Date.now()).slice(0,5);
+  const admin = profile.role==="admin";
+  const setter = profile.role==="setter";
+  const firstName = profile.full_name.split(" ")[0] || "equipo";
 
-  const chart = buildMonthlySeries(deals);
-  const roleTitle = profile.role === "admin" ? "Visión general del negocio" : profile.role === "setter" ? "Mi rendimiento como Setter" : "Mi rendimiento como Closer";
-  const roleSubtitle = profile.role === "admin" ? "Pipeline, cierres, pérdidas y evolución comercial." : "Tus resultados, progreso y oportunidades para mejorar tus ingresos.";
+  const kpis = admin ? [
+    ["Leads activos",String(active),String(total)+" oportunidades",<Users size={17}/>],
+    ["Ventas cerradas",String(won),String(conversion)+"% conversión",<CheckCircle2 size={17}/>],
+    ["Pipeline",formatCurrency(pipeline),"Potencial activo",<Target size={17}/>],
+    ["Revenue",formatCurrency(revenue),"Ventas ganadas",<CircleDollarSign size={17}/>],
+  ] : setter ? [
+    ["Leads asignados",String(total),String(active)+" activos",<Users size={17}/>],
+    ["Contactados",String(contacted),"Oportunidades trabajadas",<TrendingUp size={17}/>],
+    ["Reuniones",String(meetings),"En etapa de reunión",<CalendarCheck2 size={17}/>],
+    ["Conversión",String(conversion)+"%",String(won)+" cerradas",<Target size={17}/>],
+  ] : [
+    ["Oportunidades",String(active),String(total)+" asignadas",<Users size={17}/>],
+    ["Ventas cerradas",String(won),formatCurrency(revenue),<CheckCircle2 size={17}/>],
+    ["Pipeline",formatCurrency(pipeline),"Potencial asignado",<Target size={17}/>],
+    ["Comisión pendiente",formatCurrency(pending),formatCurrency(earned)+" generadas",<CircleDollarSign size={17}/>],
+  ];
 
-  return (
-    <div className="p-5 md:p-7 max-w-7xl mx-auto space-y-6">
-      <div className="flex flex-wrap items-end gap-3">
-        <div><p className="text-[11px] uppercase tracking-[.18em] crm-muted">Analytics</p><h2 className="text-2xl md:text-3xl font-bold crm-text mt-1">{roleTitle}</h2><p className="text-sm crm-muted mt-1">{roleSubtitle}</p></div>
-        {profile.role !== "admin" && <button onClick={()=>onNavigate("finance")} className="ml-auto px-4 py-2 rounded-xl bg-[var(--crm-accent)] text-white text-xs font-semibold shadow-lg">Ver mis comisiones</button>}
+  return <div className="p-5 md:p-8 max-w-[1440px] mx-auto space-y-6">
+    <div className="flex flex-col lg:flex-row lg:items-center gap-4">
+      <div className="flex-1">
+        <p className="text-[11px] uppercase tracking-[.18em] crm-muted">{admin?"Visión general":"Rendimiento personal"}</p>
+        <h1 className="text-[28px] md:text-[32px] font-semibold crm-text mt-2">Hola, {firstName}.</h1>
+        <p className="text-sm crm-muted mt-2">{admin?"Aquí tienes el estado general de EMPREX y las oportunidades que necesitan atención.":setter?"Prioriza tus leads, genera reuniones y mantén tu seguimiento al día.":"Identifica qué oportunidades puedes cerrar y cuánto puedes generar en comisiones."}</p>
       </div>
-
-      <div className="grid grid-cols-2 xl:grid-cols-5 gap-4">
-        <Kpi icon={<Users size={17}/>} label="Leads" value={String(total)} sub={String(active)+" activos"} loading={isLoading}/>
-        <Kpi icon={<CheckCircle2 size={17}/>} label="Cerrados" value={String(won)} sub={String(conversion)+"% conversión"} loading={isLoading} positive/>
-        <Kpi icon={<TrendingDown size={17}/>} label="Perdidos" value={String(lost)} sub="Para analizar objeciones" loading={isLoading}/>
-        <Kpi icon={<Target size={17}/>} label={profile.role==="admin" ? "Pipeline" : "Pipeline asignado"} value={formatCurrency(pipeline)} sub="Potencial comercial" loading={isLoading}/>
-        <Kpi icon={<CircleDollarSign size={17}/>} label={profile.role==="admin" ? "Revenue" : "Por cobrar"} value={profile.role==="admin" ? formatCurrency(revenue) : formatCurrency(commissionPending)} sub={profile.role==="admin" ? "Ventas ganadas" : "Comisiones pendientes"} loading={isLoading} accent/>
-      </div>
-
-      <div className="grid xl:grid-cols-[1.7fr_1fr] gap-5">
-        <section className="crm-card rounded-2xl p-5 md:p-6">
-          <div className="flex items-start justify-between mb-5"><div><h3 className="text-sm font-bold crm-text">Evolución comercial</h3><p className="text-xs crm-muted mt-1">Leads creados, ganados y perdidos en los últimos 6 meses.</p></div><div className="flex gap-3 text-[10px] crm-muted"><span><i className="inline-block w-2 h-2 rounded-full bg-blue-500 mr-1"/>Leads</span><span><i className="inline-block w-2 h-2 rounded-full bg-emerald-500 mr-1"/>Ganados</span></div></div>
-          <SalesChart data={chart}/>
-        </section>
-
-        <section className="crm-card rounded-2xl p-5">
-          <div className="flex items-center justify-between"><div><h3 className="text-sm font-bold crm-text">Estado del pipeline</h3><p className="text-xs crm-muted mt-1">Lectura rápida de resultados.</p></div><TrendingUp size={18} className="crm-accent"/></div>
-          <div className="mt-6 space-y-5">
-            <Progress label="Cerrados" value={won} total={Math.max(total,1)} tone="emerald"/>
-            <Progress label="Perdidos" value={lost} total={Math.max(total,1)} tone="rose"/>
-            <Progress label="Activos" value={active} total={Math.max(total,1)} tone="blue"/>
-          </div>
-          {profile.role !== "admin" && <div className="mt-6 p-4 rounded-xl bg-[var(--crm-glow)] border crm-border"><p className="text-[10px] uppercase tracking-wider crm-muted">Comisiones generadas</p><p className="text-xl font-bold crm-text mt-1">{formatCurrency(commissionEarned)}</p><p className="text-xs crm-muted mt-1">Pagado: {formatCurrency(commissionPaid)}</p></div>}
-        </section>
-      </div>
-
-      {overdue.length > 0 && <section className="crm-card rounded-2xl p-5 border-amber-500/20"><div className="flex items-center justify-between mb-3"><div><h3 className="text-sm font-bold text-amber-500 flex items-center gap-2"><AlertTriangle size={15}/> Requiere atención</h3><p className="text-xs crm-muted mt-1">Seguimientos vencidos todavía abiertos.</p></div><button onClick={()=>onNavigate("leads")} className="text-xs crm-accent flex items-center gap-1">Ver leads <ArrowRight size={11}/></button></div><div className="divide-y crm-border">{overdue.map(d=><div key={d.id} className="py-3 flex items-center gap-3"><div className="flex-1 min-w-0"><p className="text-sm font-semibold crm-text truncate">{d.contact.full_name}</p><p className="text-[11px] crm-muted truncate">{d.next_action || "Seguimiento pendiente"}</p></div><span className="text-[11px] font-semibold text-amber-500">{new Date(d.next_follow_up_at!).toLocaleString("es-EC",{dateStyle:"short",timeStyle:"short"})}</span></div>)}</div></section>}
+      <button onClick={()=>onNavigate("leads")} className="crm-primary-button rounded-xl px-4 py-2.5 text-xs font-semibold self-start">{admin?"+ Nueva oportunidad":setter?"Ver mis leads":"Ver oportunidades"}</button>
     </div>
-  );
+
+    <div className="grid sm:grid-cols-2 xl:grid-cols-4 gap-4">
+      {kpis.map(([label,value,sub,icon])=><Kpi key={String(label)} label={String(label)} value={String(value)} sub={String(sub)} icon={icon as React.ReactNode} loading={isLoading}/>)}
+    </div>
+
+    <div className="grid xl:grid-cols-[1.65fr_.85fr] gap-5">
+      <div className="crm-card p-5 md:p-6">
+        <div className="mb-6"><h2 className="text-sm font-semibold crm-text">Rendimiento mensual</h2><p className="text-xs crm-muted mt-1">Leads creados y ventas cerradas en los últimos 6 meses.</p></div>
+        <SalesChart deals={deals}/>
+      </div>
+      <div className="crm-card p-5 md:p-6">
+        <h2 className="text-sm font-semibold crm-text">Embudo de conversión</h2><p className="text-xs crm-muted mt-1">Lectura rápida del pipeline.</p>
+        <div className="mt-6 space-y-4">
+          <Funnel label="Leads" value={total} total={Math.max(total,1)}/>
+          <Funnel label="Contactados" value={contacted} total={Math.max(total,1)}/>
+          <Funnel label="Reunión" value={meetings} total={Math.max(total,1)}/>
+          <Funnel label="Cerrados" value={won} total={Math.max(total,1)}/>
+        </div>
+      </div>
+    </div>
+
+    <div className="grid xl:grid-cols-3 gap-5">
+      <div className="crm-card p-5 md:p-6 xl:col-span-2">
+        <div className="flex items-center justify-between"><div><h2 className="text-sm font-semibold crm-text">Prioridades de hoy</h2><p className="text-xs crm-muted mt-1">Seguimientos abiertos que requieren acción.</p></div><button onClick={()=>onNavigate("leads")} className="text-xs crm-accent flex items-center gap-1">Ver leads <ArrowRight size={12}/></button></div>
+        <div className="mt-4 divide-y crm-border">{overdue.length?overdue.map(d=><div key={d.id} className="py-3.5 flex items-center gap-3"><div className="flex-1 min-w-0"><p className="text-sm font-medium crm-text truncate">{d.contact.full_name}</p><p className="text-[11px] crm-muted truncate">{d.next_action || "Seguimiento pendiente"} · {d.stage.name}</p></div><span className="text-[11px] crm-muted">{new Date(d.next_follow_up_at!).toLocaleString("es-EC",{dateStyle:"short",timeStyle:"short"})}</span></div>):<p className="text-sm crm-muted py-6">No hay seguimientos vencidos.</p>}</div>
+      </div>
+      <div className="crm-card p-5 md:p-6">
+        <h2 className="text-sm font-semibold crm-text">{admin?"Finanzas":"Mis comisiones"}</h2><p className="text-xs crm-muted mt-1">Resumen financiero.</p>
+        <div className="mt-5 space-y-3"><Money label="Generadas" value={formatCurrency(earned)}/><Money label="Pagadas" value={formatCurrency(paid)}/><Money label="Pendiente" value={formatCurrency(pending)}/></div>
+        <button onClick={()=>onNavigate("finance")} className="crm-secondary-button w-full rounded-xl px-3 py-2.5 text-xs font-semibold mt-5">{admin?"Ver Finanzas":"Ver mis comisiones"}</button>
+      </div>
+    </div>
+
+    {admin&&<div className="crm-card p-5 md:p-6"><div className="flex items-center justify-between"><div><h2 className="text-sm font-semibold crm-text">Servicios activos</h2><p className="text-xs crm-muted mt-1">Portafolio comercial principal.</p></div><button onClick={()=>onNavigate("settings")} className="text-xs crm-accent">Gestionar servicios →</button></div><div className="grid sm:grid-cols-2 xl:grid-cols-4 gap-3 mt-5">{["EMPREX Patient Funnel","EMPREX Smart Agent","EMPREX Growth Content","EMPREX Híbrido"].map(name=><div key={name} className="rounded-xl border crm-border bg-[var(--crm-surface-muted)] px-4 py-3 text-xs font-medium crm-text">{name}</div>)}</div></div>}
+  </div>;
 }
 
-function Kpi({icon,label,value,sub,loading,positive=false,accent=false}:{icon:React.ReactNode;label:string;value:string;sub:string;loading:boolean;positive?:boolean;accent?:boolean}) {
-  return <div className={"crm-card crm-card-hover rounded-2xl p-5 "+(accent?"crm-kpi-accent":"")}><div className={"w-9 h-9 rounded-xl grid place-items-center mb-4 "+(positive?"bg-emerald-500/10 text-emerald-500":"bg-[var(--crm-glow)] crm-accent")}>{icon}</div><p className="text-[10px] uppercase tracking-wider crm-muted">{label}</p><p className="text-2xl font-bold crm-text mt-1">{loading ? "…" : value}</p><p className="text-xs crm-muted mt-1">{sub}</p></div>;
+function Kpi({icon,label,value,sub,loading}:{icon:React.ReactNode;label:string;value:string;sub:string;loading:boolean}) {
+  return <div className="crm-card crm-card-hover p-5"><div className="flex items-start justify-between gap-4"><div><p className="text-[10px] uppercase tracking-[.15em] crm-muted">{label}</p><p className="text-[28px] font-semibold crm-text mt-3">{loading?"…":value}</p><p className="text-xs crm-muted mt-1">{sub}</p></div><div className="w-9 h-9 rounded-xl bg-[var(--crm-accent-soft)] crm-accent grid place-items-center">{icon}</div></div></div>;
 }
-
-function Progress({label,value,total,tone}:{label:string;value:number;total:number;tone:"emerald"|"rose"|"blue"}) {
-  const pct=Math.min(100,Math.round(value/total*100));
-  const bar=tone==="emerald"?"bg-emerald-500":tone==="rose"?"bg-rose-500":"bg-blue-500";
-  return <div><div className="flex justify-between text-xs mb-2"><span className="crm-muted">{label}</span><span className="font-semibold crm-text">{value} · {pct}%</span></div><div className="h-2 rounded-full bg-slate-500/10 overflow-hidden"><div className={"h-full rounded-full "+bar} style={{width:String(pct)+"%"}}/></div></div>;
-}
-
-function buildMonthlySeries(deals:any[]) {
-  const now=new Date(); const months=[] as {label:string;leads:number;won:number;lost:number}[];
-  for(let i=5;i>=0;i--){ const d=new Date(now.getFullYear(),now.getMonth()-i,1); months.push({label:d.toLocaleDateString("es-EC",{month:"short"}),leads:0,won:0,lost:0}); }
-  deals.forEach(deal=>{ const d=new Date(deal.created_at); const diff=(now.getFullYear()-d.getFullYear())*12+(now.getMonth()-d.getMonth()); if(diff>=0&&diff<6){ const idx=5-diff; months[idx].leads++; if(deal.stage.is_won)months[idx].won++; if(deal.stage.is_lost)months[idx].lost++; }});
-  return months;
-}
-
-function SalesChart({data}:{data:{label:string;leads:number;won:number;lost:number}[]}) {
-  const max=Math.max(1,...data.flatMap(d=>[d.leads,d.won,d.lost]));
-  const points=(key:"leads"|"won"|"lost")=>data.map((d,i)=>String(i*20)+","+String(90-(d[key]/max)*72)).join(" ");
-  return <div><svg viewBox="0 0 100 100" className="w-full h-64 overflow-visible" preserveAspectRatio="none"><defs><linearGradient id="leadArea" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="var(--crm-accent)" stopOpacity=".18"/><stop offset="100%" stopColor="var(--crm-accent)" stopOpacity="0"/></linearGradient></defs>{[18,36,54,72,90].map(y=><line key={y} x1="0" x2="100" y1={y} y2={y} stroke="var(--crm-border)" strokeWidth=".45"/>)}<polyline fill="none" stroke="var(--crm-accent)" strokeWidth="1.8" vectorEffect="non-scaling-stroke" points={points("leads")}/><polyline fill="none" stroke="#10b981" strokeWidth="1.5" vectorEffect="non-scaling-stroke" points={points("won")}/><polyline fill="none" stroke="#f43f5e" strokeWidth="1.2" strokeDasharray="3 2" vectorEffect="non-scaling-stroke" points={points("lost")}/></svg><div className="grid grid-cols-6 mt-2">{data.map(d=><span key={d.label} className="text-center text-[10px] crm-muted capitalize">{d.label}</span>)}</div></div>;
+function Funnel({label,value,total}:{label:string;value:number;total:number}) { const pct=Math.round(value/total*100); return <div><div className="flex justify-between text-xs"><span className="crm-muted">{label}</span><span className="crm-text">{value} · {pct}%</span></div><div className="h-1.5 rounded-full bg-[var(--crm-surface-muted)] mt-2 overflow-hidden"><div className="h-full bg-[var(--crm-accent)] rounded-full" style={{width:String(pct)+"%"}}/></div></div>; }
+function Money({label,value}:{label:string;value:string}) { return <div className="flex justify-between py-2 border-b crm-border last:border-0"><span className="text-xs crm-muted">{label}</span><span className="text-sm font-semibold crm-text">{value}</span></div>; }
+function SalesChart({deals}:{deals:any[]}) {
+  const now=new Date(); const data=[] as {label:string;leads:number;won:number}[];
+  for(let i=5;i>=0;i--){const d=new Date(now.getFullYear(),now.getMonth()-i,1);data.push({label:d.toLocaleDateString("es-EC",{month:"short"}),leads:0,won:0});}
+  deals.forEach(deal=>{const d=new Date(deal.created_at);const diff=(now.getFullYear()-d.getFullYear())*12+(now.getMonth()-d.getMonth());if(diff>=0&&diff<6){const idx=5-diff;data[idx].leads++;if(deal.stage.is_won)data[idx].won++;}});
+  const max=Math.max(1,...data.flatMap(d=>[d.leads,d.won])); const pts=(key:"leads"|"won")=>data.map((d,i)=>String(i*20)+","+String(88-(d[key]/max)*68)).join(" ");
+  return <div><svg viewBox="0 0 100 96" className="w-full h-64" preserveAspectRatio="none">{[20,37,54,71,88].map(y=><line key={y} x1="0" x2="100" y1={y} y2={y} stroke="var(--crm-border)" strokeWidth=".45"/>)}<polyline fill="none" stroke="var(--crm-accent)" strokeWidth="1.8" vectorEffect="non-scaling-stroke" points={pts("leads")}/><polyline fill="none" stroke="var(--crm-accent-hover)" strokeOpacity=".45" strokeWidth="1.4" vectorEffect="non-scaling-stroke" points={pts("won")}/></svg><div className="grid grid-cols-6 mt-2">{data.map(d=><span key={d.label} className="text-center text-[10px] crm-muted capitalize">{d.label}</span>)}</div></div>;
 }
