@@ -65,8 +65,8 @@ export default function Dashboard() {
   return <div className="crm-shell flex h-screen overflow-hidden">
     {sidebarOpen && <div className="fixed inset-0 z-20 bg-[#061426]/70 md:hidden" onClick={()=>setSidebarOpen(false)}/>}
     <aside className={"crm-sidebar fixed md:relative z-30 h-full flex flex-col w-[272px] border-r transition-transform duration-200 "+(sidebarOpen?"translate-x-0":"-translate-x-full md:translate-x-0")}>
-      <div className="h-[88px] px-6 flex items-center border-b border-white/[.07]">
-        <img src="/emprex-logo.svg" alt="EMPREX" className="w-[205px] h-auto max-h-[64px] object-contain object-left -ml-3"/>
+      <div className="h-[96px] px-5 flex items-center border-b border-white/[.07]">
+        <div className="w-full max-w-[228px] h-[64px] flex items-center overflow-visible"><img src="/emprex-logo.svg" alt="EMPREX" className="block w-full h-full object-contain object-left"/></div>
         <button onClick={()=>setSidebarOpen(false)} className="md:hidden ml-auto text-white/60"><X size={17}/></button>
       </div>
 
