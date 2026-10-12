@@ -94,7 +94,7 @@ export default function SettingsSection({ userEmail }: { userEmail: string }) {
         <h3 className="text-xs font-bold text-slate-300 uppercase tracking-wider mb-4">Mi perfil</h3>
         <div className="flex flex-col md:flex-row gap-5">
           <div className="flex flex-col items-center gap-2">
-            <div className="w-20 h-20 rounded-2xl overflow-hidden bg-blue-600 grid place-items-center border border-slate-700">
+            <div className="w-20 h-20 rounded-2xl overflow-hidden bg-violet-600 grid place-items-center border border-slate-700">
               {profile?.avatar_url ? (
                 <img src={profile.avatar_url} alt="Foto de perfil" className="w-full h-full object-cover" />
               ) : (
@@ -115,7 +115,7 @@ export default function SettingsSection({ userEmail }: { userEmail: string }) {
             <Field label="Email"><input value={userEmail} disabled className={`${inputClass} opacity-60`} /></Field>
             <div className="md:col-span-2 flex items-center gap-3">
               <button onClick={() => void saveProfile()} disabled={updateMyProfile.isPending}
-                className="px-4 py-2 bg-blue-600 text-white text-xs font-bold rounded-lg flex items-center gap-1.5">
+                className="px-4 py-2 bg-violet-600 text-white text-xs font-bold rounded-lg flex items-center gap-1.5">
                 <Save size={13}/> Guardar perfil
               </button>
               {profileMessage && <span className="text-xs text-emerald-400">{profileMessage}</span>}
@@ -162,7 +162,7 @@ export default function SettingsSection({ userEmail }: { userEmail: string }) {
               </Field>
               <div className="md:col-span-2 flex items-center gap-3">
                 <button onClick={() => void createUser()} disabled={creatingUser}
-                  className="px-4 py-2 bg-blue-600 text-white text-xs font-bold rounded-lg flex items-center gap-1.5">
+                  className="px-4 py-2 bg-violet-600 text-white text-xs font-bold rounded-lg flex items-center gap-1.5">
                   <UserPlus size={13}/> {creatingUser ? "Creando..." : "Crear usuario"}
                 </button>
                 {newUserMessage && <span className="text-xs text-slate-400">{newUserMessage}</span>}
@@ -208,7 +208,8 @@ export default function SettingsSection({ userEmail }: { userEmail: string }) {
   );
 }
 
-const inputClass = "w-full bg-slate-950 border border-slate-700 text-slate-200 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-blue-600";
+const inputClass = "w-full bg-slate-950 border border-slate-700 text-slate-200 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-violet-600";
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return <div><label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">{label}</label>{children}</div>;
 }
+

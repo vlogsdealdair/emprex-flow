@@ -15,7 +15,7 @@ interface Props {
 }
 
 const sources = ["Instagram", "LinkedIn", "YouTube", "TikTok", "Referido", "Cold Outreach", "Sitio Web", "Email Marketing"];
-const inputClass = "w-full bg-slate-950 border border-slate-700 text-slate-200 placeholder-slate-600 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-blue-600";
+const inputClass = "w-full bg-slate-950 border border-slate-700 text-slate-200 placeholder-slate-600 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-violet-600";
 const labelClass = "block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5";
 
 const empty = (stageId = ""): DealFormPayload => ({
@@ -190,7 +190,7 @@ export default function LeadModal({ isOpen, deal, stages, services, team, curren
 
           <div className="px-5 py-4 border-t border-slate-800 flex justify-end gap-2">
             <button type="button" onClick={onClose} className="px-4 py-2 text-sm text-slate-400">Cancelar</button>
-            <button disabled={isSubmitting} className="px-4 py-2 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-sm font-bold rounded-lg flex items-center gap-2">
+            <button disabled={isSubmitting} className="px-4 py-2 bg-violet-600 hover:bg-violet-500 disabled:opacity-50 text-white text-sm font-bold rounded-lg flex items-center gap-2">
               {isSubmitting ? <Loader2 size={14} className="animate-spin" /> : deal ? <Save size={14} /> : <Plus size={14} />}
               {deal ? "Guardar cambios" : "Crear lead"}
             </button>
@@ -200,3 +200,4 @@ export default function LeadModal({ isOpen, deal, stages, services, team, curren
     </div>
   );
 }
+

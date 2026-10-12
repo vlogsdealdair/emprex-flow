@@ -31,8 +31,8 @@ export default function Login() {
       style={{ fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif" }}>
       <div className="w-full max-w-sm">
         <div className="flex flex-col items-center mb-8">
-          <div className="w-[230px] h-[82px] rounded-2xl bg-[#061426] border border-white/10 flex items-center justify-center mb-5 px-4 py-3 shadow-xl">
-            <img src="/emprex-logo.svg" alt="EMPREX" className="block w-full h-full object-contain" />
+          <div className="emprex-brand w-[230px] h-[82px] rounded-2xl bg-[#0b0b0f] border border-white/10 flex items-center justify-center mb-5 px-4 py-3 shadow-xl">
+            <img src="/emprex-logo-white.png" alt="EMPREX" className="block w-full h-full object-contain" />
           </div>
           <h1 className="text-xl font-bold crm-text">EMPREX CRM</h1>
           <p className="text-xs crm-muted mt-1.5">Acceso restringido al equipo</p>
