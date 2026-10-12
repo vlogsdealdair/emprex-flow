@@ -171,8 +171,8 @@ export function useToggleTaskComplete() {
 }
 
 
-export function useClients() {
-  return useQuery({ queryKey: CRM_KEYS.clients, queryFn: fetchClients, staleTime: 30_000 });
+export function useClients(includeArchived = false) {
+  return useQuery({ queryKey: [...CRM_KEYS.clients,includeArchived], queryFn: ()=>fetchClients(includeArchived), staleTime: 30_000 });
 }
 
 export function useNotifications() {
@@ -350,3 +350,4 @@ export function useCreateCommissionPayment() {
     onSuccess: () => qc.invalidateQueries({ queryKey: CRM_KEYS.commissions }),
   });
 }
+

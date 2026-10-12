@@ -27,7 +27,7 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen crm-shell flex items-center justify-center px-4"
+    <div className="login-premium min-h-screen crm-shell flex items-center justify-center px-4"
       style={{ fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif" }}>
       <div className="w-full max-w-sm">
         <div className="flex flex-col items-center mb-8">
@@ -65,3 +65,4 @@ export default function Login() {
     </div>
   );
 }
+

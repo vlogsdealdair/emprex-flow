@@ -1,0 +1,36 @@
+import {PGlite} from '@electric-sql/pglite';
+import {readFileSync} from 'node:fs';
+import {test} from 'node:test';
+import assert from 'node:assert/strict';
+test('only admin can delete clients without relationships; keeps an audit',async()=>{
+ const db=new PGlite();
+ await db.exec(`create role authenticated;create role anon;create schema auth;create schema app_private;grant usage on schema public,app_private,auth to authenticated,anon;
+ create function auth.uid() returns uuid language sql stable as $$select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid$$;
+ create function app_private.is_admin() returns boolean language sql stable as $$select coalesce(current_setting('test.admin',true)='true',false)$$;
+ create table contacts(id uuid primary key default gen_random_uuid());create table clients(id uuid primary key default gen_random_uuid(),contact_id uuid references contacts,first_won_deal_id uuid);
+ create table deals(id uuid default gen_random_uuid(),contact_id uuid references contacts);create table production_projects(client_id uuid references clients);
+ create table activities(contact_id uuid references contacts);create table tasks(contact_id uuid references contacts);
+ create table audit_log(actor_id uuid,entity_type text,entity_id uuid,action text,old_data jsonb);`);
+ await db.exec(readFileSync(new URL('../docs/delete-unused-client.sql',import.meta.url),'utf8'));
+ const contact=(await db.query('insert into contacts default values returning id')).rows[0].id;
+ const client=(await db.query('insert into clients(contact_id) values($1) returning id',[contact])).rows[0].id;
+ await db.query("select set_config('request.jwt.claim.sub','11111111-1111-4111-8111-111111111111',false)");
+ await db.exec('set role authenticated');
+ await assert.rejects(db.query('select public.delete_unused_client($1)',[client]),/Solo el administrador/);
+ await db.query("select set_config('test.admin','true',false)");await db.exec('reset role');
+ await db.query('insert into deals(contact_id) values($1)',[contact]);await db.exec('set role authenticated');
+ await assert.rejects(db.query('select public.delete_unused_client($1)',[client]),/registros vinculados/);
+ await db.exec('reset role');await db.exec('delete from deals');
+ await db.query('insert into tasks(contact_id) values($1)',[contact]);await db.exec('set role authenticated');
+ await assert.rejects(db.query('select public.delete_unused_client($1)',[client]),/registros vinculados/);
+ await db.exec('reset role');await db.exec('delete from tasks');
+ await db.query('insert into production_projects(client_id) values($1)',[client]);await db.exec('set role authenticated');
+ await assert.rejects(db.query('select public.delete_unused_client($1)',[client]),/registros vinculados/);
+ await db.exec('reset role');await db.exec('delete from production_projects');await db.exec('set role authenticated');
+ await db.query('select public.delete_unused_client($1)',[client]);await db.exec('reset role');
+ assert.equal((await db.query('select * from clients')).rows.length,0);assert.equal((await db.query('select * from contacts')).rows.length,0);
+ assert.equal((await db.query('select action from audit_log')).rows[0].action,'delete_unused_client');
+ await db.exec('set role anon');await assert.rejects(db.query('select public.delete_unused_client($1)',[client]),/permission denied/);
+ await db.close();
+});
+

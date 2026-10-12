@@ -272,14 +272,24 @@ export type ClientView = Client & {
   first_won_deal: Deal | null;
 };
 
-export async function fetchClients(): Promise<ClientView[]> {
-  const { data, error } = await supabase
+export async function fetchClients(includeArchived = false): Promise<ClientView[]> {
+  let query = supabase
     .from("clients")
     .select("*, contact:contacts(*), first_won_deal:deals!clients_first_won_deal_id_fkey(*)")
-    .eq("is_active", true)
     .order("became_client_at", { ascending: false });
+  if (!includeArchived) query = query.eq("is_active", true);
+  const { data, error } = await query;
   if (error) throw error;
   return (data ?? []) as unknown as ClientView[];
+}
+
+export async function setClientArchived(id:string, archived:boolean) {
+  const {error}=await supabase.from("clients").update({is_active:!archived}).eq("id",id).select("id").single();
+  if(error) throw error;
+}
+export async function deleteUnusedClient(id:string) {
+  const {error}=await supabase.rpc("delete_unused_client",{p_client_id:id});
+  if(error) throw error;
 }
 
 export async function fetchNotifications(): Promise<Notification[]> {
@@ -421,7 +431,7 @@ export type Commission = Tables<"commissions">;
 export type CommissionPayment = Tables<"commission_payments">;
 
 export type CommissionView = Commission & {
-  profile: Pick<Profile, "id" | "full_name" | "email" | "role">;
+  profile: Pick<Profile, "id" | "full_name" | "email" | "role" | "avatar_url">;
   deal: (Deal & { contact: Contact }) | null;
   payments: CommissionPayment[];
 };
@@ -462,7 +472,7 @@ export async function updateCommissionRule(id: string, patch: { calculation_type
 export async function fetchCommissions(): Promise<CommissionView[]> {
   const { data, error } = await supabase
     .from("commissions")
-    .select("*, profile:profiles!commissions_profile_id_fkey(id,full_name,email,role), deal:deals!commissions_deal_id_fkey(*, contact:contacts(*)), payments:commission_payments(*)")
+    .select("*, profile:profiles!commissions_profile_id_fkey(id,full_name,email,role,avatar_url), deal:deals!commissions_deal_id_fkey(*, contact:contacts(*)), payments:commission_payments(*)")
     .order("earned_at", { ascending: false });
   if (error) throw error;
   return (data ?? []) as unknown as CommissionView[];
@@ -477,3 +487,4 @@ export async function createCommissionPayment(input: { commissionId: string; amo
   });
   if (error) throw error;
 }
+
