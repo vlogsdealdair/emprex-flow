@@ -28,14 +28,15 @@ export default function App() {
       if (!window.localStorage.getItem("emprex-theme")) applyStoredOrAutomaticTheme();
     }, 60000);
 
-    supabase.auth.getSession().then(({ data }: { data: { session: Session | null } }) => {
-      setSession(data.session);
-      setLoading(false);
-    });
-
+    let currentUserId: string | null = null;
     const { data: listener } = supabase.auth.onAuthStateChange((_e: AuthChangeEvent, s: Session | null) => {
-      if (_e === "SIGNED_OUT" || _e === "SIGNED_IN") queryClient.clear();
+      const nextUserId = s?.user.id ?? null;
+      // SIGNED_IN also fires when returning to a tab with the same session.
+      // Keep cached queries and mounted forms unless the account changes.
+      if (nextUserId !== currentUserId) queryClient.clear();
+      currentUserId = nextUserId;
       setSession(s);
+      setLoading(false);
     });
 
     return () => {
