@@ -12,7 +12,7 @@ export default function NotificationsBell() {
     <div className="relative">
       <button onClick={() => setOpen(v => !v)} className="relative w-8 h-8 rounded-lg bg-slate-900 border border-slate-800 grid place-items-center text-slate-500 hover:text-slate-300">
         <Bell size={14} />
-        {unread > 0 && <span className="absolute -top-1 -right-1 min-w-4 h-4 px-1 rounded-full bg-violet-600 text-[9px] font-bold text-white grid place-items-center">{unread > 9 ? "9+" : unread}</span>}
+        {unread > 0 && <span className="absolute -top-1 -right-1 min-w-4 h-4 px-1 rounded-full bg-blue-600 text-[9px] font-bold text-white grid place-items-center">{unread > 9 ? "9+" : unread}</span>}
       </button>
 
       {open && (
@@ -31,7 +31,7 @@ export default function NotificationsBell() {
                     {n.body && <p className="text-[11px] text-slate-500 mt-1">{n.body}</p>}
                     <p className="text-[10px] text-slate-700 mt-1">{new Date(n.created_at).toLocaleString("es-EC", { dateStyle: "short", timeStyle: "short" })}</p>
                   </div>
-                  {!n.read_at && <Check size={12} className="text-violet-500 mt-1" />}
+                  {!n.read_at && <Check size={12} className="text-blue-500 mt-1" />}
                 </div>
               </button>
             ))}

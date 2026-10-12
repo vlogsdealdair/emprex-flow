@@ -99,7 +99,7 @@ export default function LeadsSection() {
 
         <span className="text-xs text-slate-600 ml-auto">{filtered.length} oportunidades</span>
         <button onClick={() => setModal({ open: true, deal: null })}
-          className="px-3.5 py-2 bg-violet-600 hover:bg-violet-500 text-white text-xs font-bold rounded-lg flex items-center gap-1.5">
+          className="px-3.5 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold rounded-lg flex items-center gap-1.5">
           <Plus size={13} /> Nuevo lead
         </button>
       </div>
@@ -234,7 +234,7 @@ function DealsTable({ deals, stages, isAdmin, onMove, onOpen, onEdit, onDelete }
             return (
             <tr key={deal.id} className={overdue ? "bg-amber-950/10 hover:bg-amber-950/20" : "hover:bg-slate-800/20"}>
               <td className="px-4 py-3">
-                <button onClick={() => onOpen(deal)} className="text-left"><p className="text-sm font-semibold text-slate-200 hover:text-violet-400">{deal.contact.full_name}</p></button>
+                <button onClick={() => onOpen(deal)} className="text-left"><p className="text-sm font-semibold text-slate-200 hover:text-blue-400">{deal.contact.full_name}</p></button>
                 <p className="text-[11px] text-slate-600">{deal.contact.company || deal.contact.email || "—"}</p>
               </td>
               <td className="px-4 py-3">
@@ -254,7 +254,7 @@ function DealsTable({ deals, stages, isAdmin, onMove, onOpen, onEdit, onDelete }
               </td>
               <td className="px-4 py-3">
                 <div className="flex gap-1">
-                  <button onClick={() => onEdit(deal)} className="w-7 h-7 rounded-md bg-slate-800 grid place-items-center text-slate-400 hover:text-violet-400"><Edit2 size={12} /></button>
+                  <button onClick={() => onEdit(deal)} className="w-7 h-7 rounded-md bg-slate-800 grid place-items-center text-slate-400 hover:text-blue-400"><Edit2 size={12} /></button>
                   {isAdmin && <button onClick={() => void onDelete(deal)} className="w-7 h-7 rounded-md bg-slate-800 grid place-items-center text-slate-500 hover:text-red-400"><Trash2 size={12} /></button>}
                 </div>
               </td>

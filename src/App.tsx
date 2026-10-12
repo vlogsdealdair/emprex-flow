@@ -47,10 +47,10 @@ export default function App() {
   if (loading) return (
     <div className="min-h-screen crm-shell flex items-center justify-center">
       <div className="flex flex-col items-center gap-5">
-        <div className="emprex-brand w-40 h-14 rounded-2xl bg-[#0b0b0f] border border-white/10 px-5 py-3 shadow-2xl">
+        <div className="emprex-brand w-40 h-14 rounded-2xl bg-[#15181e] border border-white/10 px-5 py-3 shadow-2xl">
           <img src="/emprex-logo-white.png" alt="EMPREX" className="w-full h-full object-contain" />
         </div>
-        <div className="w-5 h-5 border-2 border-[#a78bfa] border-t-transparent rounded-full animate-spin" />
+        <div className="w-5 h-5 border-2 border-[#60a5fa] border-t-transparent rounded-full animate-spin" />
       </div>
     </div>
   );

@@ -122,7 +122,7 @@ export default function DealDetailPanel({ deal, onClose, onEdit }: {
             <h2 className="text-base font-bold text-white truncate">{deal.contact.full_name}</h2>
             <p className="text-xs text-slate-500 mt-1">{deal.service?.name || "Sin servicio"} · {formatCurrency(Number(deal.potential_value_usd || 0))}</p>
           </div>
-          <button onClick={onEdit} className="px-3 py-1.5 rounded-lg bg-violet-600 text-white text-xs font-bold">Editar</button>
+          <button onClick={onEdit} className="px-3 py-1.5 rounded-lg bg-blue-600 text-white text-xs font-bold">Editar</button>
           <button onClick={onClose} className="w-8 h-8 rounded-lg bg-slate-900 border border-slate-800 grid place-items-center text-slate-500"><X size={14} /></button>
         </div>
 
@@ -208,7 +208,7 @@ export default function DealDetailPanel({ deal, onClose, onEdit }: {
               <input type="datetime-local" value={taskDue} onChange={e => setTaskDue(e.target.value)}
                 className="bg-slate-900 border border-slate-800 rounded-lg px-2 py-2 text-xs text-slate-400 outline-none" />
               <button onClick={() => void submitTask()} disabled={createTask.isPending}
-                className="w-9 rounded-lg bg-violet-600 grid place-items-center text-white disabled:opacity-50"><Plus size={14} /></button>
+                className="w-9 rounded-lg bg-blue-600 grid place-items-center text-white disabled:opacity-50"><Plus size={14} /></button>
             </div>
 
             <div className="space-y-2">
