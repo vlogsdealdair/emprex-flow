@@ -1,73 +1,12 @@
-/* Scoped presentation layer: existing shell, grids and table columns stay intact. */
-.finance-premium, .login-premium {
-  --crm-bg: #101014;
-  --crm-surface: rgba(255,255,255,.045);
-  --crm-surface-solid: #17171e;
-  --crm-border: rgba(255,255,255,.085);
-  --crm-text: #f4f2fa;
-  --crm-muted: #a09aaa;
-  --crm-accent: #b19aff;
-  --crm-glow: rgba(139,92,246,.14);
-  color: var(--crm-text);
-  background: radial-gradient(ellipse at 95% 0%,rgba(124,58,237,.09),transparent 45%),#101014;
-  min-height: 100%;
-  color-scheme: dark;
-}
-.finance-premium .crm-card, .login-premium .crm-card {
-  background: linear-gradient(145deg,rgba(255,255,255,.055),rgba(255,255,255,.025));
-  border: 1px solid rgba(255,255,255,.09);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.025),0 12px 36px rgba(0,0,0,.16);
-  backdrop-filter: blur(18px);
-}
-.finance-premium .crm-card-hover:hover { border-color: rgba(167,139,250,.3); }
-.finance-premium .crm-kpi-accent {
-  background: linear-gradient(135deg,rgba(139,92,246,.15),rgba(255,255,255,.035));
-  border-color: rgba(167,139,250,.24);
-}
-.finance-premium input, .finance-premium select, .login-premium input {
-  color: #ede9f5 !important;
-  color-scheme: dark !important;
-  background-color: rgba(0,0,0,.17);
-  border-color: rgba(255,255,255,.10);
-  transition: border-color 180ms ease,box-shadow 180ms ease;
-}
-.finance-premium input:focus-visible, .finance-premium select:focus-visible,
-.login-premium input:focus-visible {
-  outline: none;
-  border-color: #a78bfa;
-  box-shadow: 0 0 0 3px rgba(139,92,246,.14);
-}
-.finance-premium select option { color: #f4f2fa; background: #1b1924; }
-.finance-premium input::placeholder, .login-premium input::placeholder { color: #81798e; }
-.finance-premium table { border-collapse: collapse; }
-.finance-premium thead { background: rgba(0,0,0,.14); }
-.finance-premium thead th { color: #a49bac; font-weight: 500; letter-spacing: .12em; }
-.finance-premium tbody tr { border-color: rgba(255,255,255,.055); transition: background 160ms ease; }
-.finance-premium tbody tr:hover { background: rgba(167,139,250,.035); }
-.finance-premium tbody td { vertical-align: middle; }
-.finance-person { display: flex; align-items: center; gap: 12px; }
-.finance-avatar {
-  width: 36px; height: 36px; flex-shrink: 0; border-radius: 50%; object-fit: cover;
-  border: 1px solid rgba(196,181,253,.2); background: rgba(139,92,246,.12);
-}
-.finance-avatar-fallback { display: grid; place-items: center; color: #ddd6fe; font-size: 11px; font-weight: 600; }
-.finance-premium .finance-pay-button {
-  background: rgba(139,92,246,.16); color: #d7c7ff !important;
-  border: 1px solid rgba(167,139,250,.23); box-shadow: inset 0 1px 0 rgba(255,255,255,.035);
-  transition: background 160ms ease,border-color 160ms ease;
-}
-.finance-premium .finance-pay-button:hover:not(:disabled) { background: rgba(139,92,246,.28); border-color: rgba(167,139,250,.45); }
-.finance-premium .finance-pay-button:focus-visible { outline: 2px solid #c4b5fd; outline-offset: 3px; }
-.finance-premium .finance-pay-button:disabled { cursor: not-allowed; }
-.finance-premium .text-emerald-500 { color: #6cdbb0; }
-.finance-premium .text-amber-500 { color: #e4bf86; }
-.crm-shell.login-premium {
-  background: radial-gradient(ellipse at 50% 10%,rgba(139,92,246,.18),transparent 48%),radial-gradient(ellipse at 20% 90%,rgba(79,70,229,.08),transparent 45%),#0d0c11;
-}
-.login-premium .crm-card { border-color: rgba(196,181,253,.14); box-shadow: 0 25px 80px rgba(0,0,0,.32),inset 0 1px 0 rgba(255,255,255,.05); }
-:root .login-premium button[type="submit"] { background: linear-gradient(135deg,#8b5cf6,#7c3aed); color: #fff !important; box-shadow: 0 7px 24px rgba(124,58,237,.22); }
-.login-premium input:-webkit-autofill { -webkit-text-fill-color: #f4f2fa; box-shadow: 0 0 0 1000px #191620 inset; }
-@media (prefers-reduced-motion: reduce) {
-  .finance-premium *, .login-premium * { transition: none !important; }
-}
+.finance-person {display:flex;align-items:center;gap:12px;}
+.finance-avatar {width:36px;height:36px;flex-shrink:0;border-radius:50%;object-fit:cover;border:1px solid rgba(196,181,253,.2);background:var(--crm-accent-soft);}
+.finance-avatar-fallback {display:grid;place-items:center;color:var(--crm-accent);font-size:11px;font-weight:600;}
+.finance-pay-button {background:var(--crm-accent-soft);color:var(--crm-accent) !important;border:1px solid color-mix(in srgb,var(--crm-accent) 25%,var(--crm-border));transition:background 160ms ease;}
+.finance-pay-button:hover:not(:disabled) {background:color-mix(in srgb,var(--crm-accent) 25%,transparent);}
+.login-premium {--crm-text:#f3f1f7;--crm-muted:#a09aaa;--crm-border:rgba(255,255,255,.09);--crm-surface:rgba(255,255,255,.04);--crm-surface-solid:#19181f;--crm-accent:#b39aff;--crm-accent-soft:rgba(139,92,246,.14);color-scheme:dark;}
+.crm-shell.login-premium {background:radial-gradient(ellipse at 50% 12%,rgba(139,92,246,.13),transparent 50%),#0d0c11;}
+.login-premium .crm-card {border-color:rgba(196,181,253,.14);box-shadow:0 25px 80px rgba(0,0,0,.28),inset 0 1px 0 rgba(255,255,255,.03);}
+:root .login-premium button[type="submit"] {background:linear-gradient(135deg,#8b5cf6,#7c3aed);color:#fff !important;box-shadow:0 7px 24px rgba(124,58,237,.2);}
+.login-premium input {color:#f3f1f7;background:rgba(0,0,0,.15);}
+.login-premium input:-webkit-autofill {-webkit-text-fill-color:#f3f1f7;box-shadow:0 0 0 1000px #191620 inset;}
 

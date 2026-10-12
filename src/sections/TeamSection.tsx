@@ -56,7 +56,7 @@ export default function TeamSection() {
                       </div>
                     </td>
                     <td className="px-4 py-3">
-                      <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-full bg-blue-950 border border-blue-900 text-blue-400">
+                      <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-full bg-violet-950 border border-violet-900 text-violet-400">
                         {member.role}
                       </span>
                     </td>
@@ -66,7 +66,7 @@ export default function TeamSection() {
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2">
                         <div className="w-16 h-1.5 rounded-full bg-slate-800 overflow-hidden">
-                          <div className="h-full bg-blue-500 rounded-full" style={{ width: `${conversion}%` }} />
+                          <div className="h-full bg-violet-500 rounded-full" style={{ width: `${conversion}%` }} />
                         </div>
                         <span className="text-xs text-slate-400">{conversion}%</span>
                       </div>
@@ -133,3 +133,4 @@ function Row({ label, value }: { label: string; value: string }) {
     </div>
   );
 }
+

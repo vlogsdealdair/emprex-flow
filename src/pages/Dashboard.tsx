@@ -62,7 +62,7 @@ export default function Dashboard() {
     window.localStorage.setItem("emprex-theme", next);
   };
 
-  if (isLoading) return <div className="min-h-screen crm-shell grid place-items-center"><div className="w-5 h-5 border-2 border-[#2f80ed] border-t-transparent rounded-full animate-spin"/></div>;
+  if (isLoading) return <div className="min-h-screen crm-shell grid place-items-center"><div className="w-5 h-5 border-2 border-[#a78bfa] border-t-transparent rounded-full animate-spin"/></div>;
   if (error || !profile) return <div className="min-h-screen crm-shell grid place-items-center text-sm text-red-400">No se pudo cargar tu perfil de acceso.</div>;
 
   const roleLabel=profile.role==="admin"?"Administrador":profile.role==="technical_partner"?"Socio técnico":profile.role==="closer"?"Closer":"Setter";
@@ -70,10 +70,10 @@ export default function Dashboard() {
   const initials=profile.full_name.split(" ").map(p=>p[0]).join("").slice(0,2).toUpperCase();
 
   return <div className="crm-shell flex h-screen overflow-hidden">
-    {sidebarOpen && <div className="fixed inset-0 z-20 bg-[#061426]/70 md:hidden" onClick={()=>setSidebarOpen(false)}/>}
+    {sidebarOpen && <div className="fixed inset-0 z-20 bg-[#0b0b0f]/70 md:hidden" onClick={()=>setSidebarOpen(false)}/>}
     <aside className={"crm-sidebar fixed md:relative z-30 h-full flex flex-col w-[272px] border-r transition-transform duration-200 "+(sidebarOpen?"translate-x-0":"-translate-x-full md:translate-x-0")}>
       <div className="h-[96px] px-5 flex items-center border-b border-white/[.07]">
-        <div className="w-full max-w-[228px] h-[64px] flex items-center overflow-visible"><img src="/emprex-logo.svg" alt="EMPREX" className="block w-full h-full object-contain object-left"/></div>
+        <div className="w-full max-w-[228px] h-[64px] flex items-center overflow-visible"><img src="/emprex-logo-white.png" alt="EMPREX" className="block w-full h-full object-contain object-left"/></div>
         <button onClick={()=>setSidebarOpen(false)} className="md:hidden ml-auto text-white/60"><X size={17}/></button>
       </div>
 
@@ -97,7 +97,7 @@ export default function Dashboard() {
 
       <div className="p-4 border-t border-white/[.07]">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-[#0c2340] border border-white/10 grid place-items-center overflow-hidden text-white">
+          <div className="w-10 h-10 rounded-xl bg-[#211f28] border border-white/10 grid place-items-center overflow-hidden text-white">
             {profile.avatar_url?<img src={profile.avatar_url} alt="" className="w-full h-full object-cover"/>:<span className="text-[11px] font-bold">{initials}</span>}
           </div>
           <div className="flex-1 min-w-0"><p className="text-xs font-semibold text-white truncate">{profile.full_name}</p><p className="text-[10px] text-white/45 mt-0.5">{roleLabel}</p></div>
@@ -143,3 +143,4 @@ export default function Dashboard() {
     </div>
   </div>;
 }
+
