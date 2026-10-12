@@ -1,12 +1,12 @@
 .finance-person {display:flex;align-items:center;gap:12px;}
-.finance-avatar {width:36px;height:36px;flex-shrink:0;border-radius:50%;object-fit:cover;border:1px solid rgba(196,181,253,.2);background:var(--crm-accent-soft);}
+.finance-avatar {width:36px;height:36px;flex-shrink:0;border-radius:50%;object-fit:cover;border:1px solid rgba(147,197,253,.2);background:var(--crm-accent-soft);}
 .finance-avatar-fallback {display:grid;place-items:center;color:var(--crm-accent);font-size:11px;font-weight:600;}
 .finance-pay-button {background:var(--crm-accent-soft);color:var(--crm-accent) !important;border:1px solid color-mix(in srgb,var(--crm-accent) 25%,var(--crm-border));transition:background 160ms ease;}
 .finance-pay-button:hover:not(:disabled) {background:color-mix(in srgb,var(--crm-accent) 25%,transparent);}
-.login-premium {--crm-text:#f3f1f7;--crm-muted:#a09aaa;--crm-border:rgba(255,255,255,.09);--crm-surface:rgba(255,255,255,.04);--crm-surface-solid:#19181f;--crm-accent:#b39aff;--crm-accent-soft:rgba(139,92,246,.14);color-scheme:dark;}
-.crm-shell.login-premium {background:radial-gradient(ellipse at 50% 12%,rgba(139,92,246,.13),transparent 50%),#0d0c11;}
-.login-premium .crm-card {border-color:rgba(196,181,253,.14);box-shadow:0 25px 80px rgba(0,0,0,.28),inset 0 1px 0 rgba(255,255,255,.03);}
-:root .login-premium button[type="submit"] {background:linear-gradient(135deg,#8b5cf6,#7c3aed);color:#fff !important;box-shadow:0 7px 24px rgba(124,58,237,.2);}
-.login-premium input {color:#f3f1f7;background:rgba(0,0,0,.15);}
-.login-premium input:-webkit-autofill {-webkit-text-fill-color:#f3f1f7;box-shadow:0 0 0 1000px #191620 inset;}
+.login-premium {--crm-text:#f3f4f6;--crm-muted:#a5adb8;--crm-border:rgba(255,255,255,.09);--crm-surface:rgba(255,255,255,.04);--crm-surface-solid:#1c2027;--crm-accent:#75b5ff;--crm-accent-soft:rgba(59,130,246,.14);color-scheme:dark;}
+.crm-shell.login-premium {background:radial-gradient(ellipse at 50% 12%,rgba(59,130,246,.13),transparent 50%),#111318;}
+.login-premium .crm-card {border-color:rgba(147,197,253,.14);box-shadow:0 25px 80px rgba(0,0,0,.28),inset 0 1px 0 rgba(255,255,255,.03);}
+:root .login-premium button[type="submit"] {background:linear-gradient(135deg,#2563eb,#1d4ed8);color:#fff !important;box-shadow:0 7px 24px rgba(37,99,235,.2);}
+.login-premium input {color:#f3f4f6;background:rgba(0,0,0,.15);}
+.login-premium input:-webkit-autofill {-webkit-text-fill-color:#f3f4f6;box-shadow:0 0 0 1000px #1c2027 inset;}
 

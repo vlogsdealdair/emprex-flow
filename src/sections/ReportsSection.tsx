@@ -112,7 +112,7 @@ export default function ReportsSection() {
                   <td className="px-4 py-3 text-sm font-semibold text-slate-300">{formatCurrency(r.pipeline)}</td>
                   <td className="px-4 py-3"><input type="number" min="0" value={draft.revenue} onChange={e => setDrafts(p => ({...p,[r.member.id]:{...draft,revenue:e.target.value}}))} className="w-28 bg-slate-950 border border-slate-700 rounded-md px-2 py-1.5 text-xs text-slate-200"/></td>
                   <td className="px-4 py-3"><input type="number" min="0" value={draft.wins} onChange={e => setDrafts(p => ({...p,[r.member.id]:{...draft,wins:e.target.value}}))} className="w-20 bg-slate-950 border border-slate-700 rounded-md px-2 py-1.5 text-xs text-slate-200"/></td>
-                  <td className="px-4 py-3"><button onClick={() => void save(r.member.id)} disabled={saveTarget.isPending} className="px-3 py-1.5 rounded-lg bg-violet-600 text-white text-xs font-semibold flex items-center gap-1.5"><Target size={12}/> Guardar</button></td>
+                  <td className="px-4 py-3"><button onClick={() => void save(r.member.id)} disabled={saveTarget.isPending} className="px-3 py-1.5 rounded-lg bg-blue-600 text-white text-xs font-semibold flex items-center gap-1.5"><Target size={12}/> Guardar</button></td>
                 </tr>
               );
             })}
