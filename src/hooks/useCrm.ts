@@ -206,7 +206,7 @@ export function useUpdateService() {
 
 export function useUpdateProfile() {
   const qc = useQueryClient();
-  return useMutation<void, Error, { id: string; patch: { role?: "admin" | "setter" | "closer"; is_active?: boolean; full_name?: string } }>({
+  return useMutation<void, Error, { id: string; patch: { role?: "admin" | "setter" | "closer" | "technical_partner"; is_active?: boolean; full_name?: string } }>({
     mutationFn: ({ id, patch }) => updateProfile(id, patch),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: CRM_KEYS.team });

@@ -65,7 +65,7 @@ export async function createCrmUser(input: {
   fullName: string;
   email: string;
   password: string;
-  role: "admin" | "setter" | "closer";
+  role: "admin" | "setter" | "closer" | "technical_partner";
 }) {
   const { data, error } = await supabase.functions.invoke("admin-tools", {
     body: { action: "create-user", ...input },

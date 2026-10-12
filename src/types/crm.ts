@@ -1,4 +1,4 @@
-export type AppRole = "admin" | "setter" | "closer";
+export type AppRole = "admin" | "setter" | "closer" | "technical_partner";
 
 export type DealStageKey =
   | "new"

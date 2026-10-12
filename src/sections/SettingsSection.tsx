@@ -32,7 +32,7 @@ export default function SettingsSection({ userEmail }: { userEmail: string }) {
   const [newUserName, setNewUserName] = useState("");
   const [newUserEmail, setNewUserEmail] = useState("");
   const [newUserPassword, setNewUserPassword] = useState("");
-  const [newUserRole, setNewUserRole] = useState<"admin" | "setter" | "closer">("setter");
+  const [newUserRole, setNewUserRole] = useState<"admin" | "setter" | "closer" | "technical_partner">("setter");
   const [newUserMessage, setNewUserMessage] = useState("");
   const [creatingUser, setCreatingUser] = useState(false);
 
@@ -154,9 +154,9 @@ export default function SettingsSection({ userEmail }: { userEmail: string }) {
               <Field label="Email"><input type="email" value={newUserEmail} onChange={e => setNewUserEmail(e.target.value)} className={inputClass} /></Field>
               <Field label="Contraseña"><input type="password" value={newUserPassword} onChange={e => setNewUserPassword(e.target.value)} className={inputClass} placeholder="Mínimo 8 caracteres" /></Field>
               <Field label="Rol">
-                <select value={newUserRole} onChange={e => setNewUserRole(e.target.value as "admin" | "setter" | "closer")} className={inputClass}>
+                <select value={newUserRole} onChange={e => setNewUserRole(e.target.value as "admin" | "setter" | "closer" | "technical_partner")} className={inputClass}>
                   <option value="setter">Setter</option>
-                  <option value="closer">Closer</option>
+                  <option value="closer">Closer</option><option value="technical_partner">Socio técnico</option>
                   <option value="admin">Admin</option>
                 </select>
               </Field>
@@ -186,10 +186,10 @@ export default function SettingsSection({ userEmail }: { userEmail: string }) {
                     <p className="text-[11px] text-slate-600">{member.email}</p>
                   </div>
                   <select value={member.role}
-                    onChange={e => void updateProfile.mutateAsync({ id: member.id, patch: { role: e.target.value as "admin" | "setter" | "closer" } })}
+                    onChange={e => void updateProfile.mutateAsync({ id: member.id, patch: { role: e.target.value as "admin" | "setter" | "closer" | "technical_partner" } })}
                     disabled={member.id === profile?.id}
                     className="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-300 disabled:opacity-50">
-                    <option value="admin">Admin</option><option value="setter">Setter</option><option value="closer">Closer</option>
+                    <option value="admin">Admin</option><option value="setter">Setter</option><option value="closer">Closer</option><option value="technical_partner">Socio técnico</option>
                   </select>
                   <button onClick={() => void updateProfile.mutateAsync({ id: member.id, patch: { is_active: !member.is_active } })}
                     disabled={member.id === profile?.id}
