@@ -3,6 +3,7 @@ import { supabase } from "./integrations/supabase/client";
 import type { Session, AuthChangeEvent } from "@supabase/supabase-js";
 import Dashboard from "./pages/Dashboard";
 import Login from "./pages/Login";
+import { useQueryClient } from "@tanstack/react-query";
 
 const getAutomaticTheme = () => {
   const hour = new Date().getHours();
@@ -16,6 +17,7 @@ const applyStoredOrAutomaticTheme = () => {
 };
 
 export default function App() {
+  const queryClient = useQueryClient();
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -31,6 +33,7 @@ export default function App() {
     });
 
     const { data: listener } = supabase.auth.onAuthStateChange((_e: AuthChangeEvent, s: Session | null) => {
+      if (_e === "SIGNED_OUT" || _e === "SIGNED_IN") queryClient.clear();
       setSession(s);
     });
 
@@ -38,7 +41,7 @@ export default function App() {
       listener.subscription.unsubscribe();
       window.clearInterval(themeTimer);
     };
-  }, []);
+  }, [queryClient]);
 
   if (loading) return (
     <div className="min-h-screen crm-shell flex items-center justify-center">
@@ -51,5 +54,5 @@ export default function App() {
     </div>
   );
 
-  return session ? <Dashboard /> : <Login />;
+  return session ? <Dashboard key={session.user.id} /> : <Login />;
 }

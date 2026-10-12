@@ -1,3 +1,4 @@
+import type { ProductionAdjustment, ProductionPayment, ProductionEvent } from "@/services/productionService";
 export type Json =
   | string
   | number
@@ -14,6 +15,9 @@ export type Database = {
   }
   public: {
     Tables: {
+      production_adjustments: { Row: ProductionAdjustment; Insert: never; Update: never; Relationships: [] };
+      production_payments: { Row: ProductionPayment; Insert: never; Update: never; Relationships: [] };
+      production_events: { Row: ProductionEvent; Insert: never; Update: never; Relationships: [] };
       activities: {
         Row: {
           body: string | null
@@ -900,7 +904,8 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      production_list: { Args: Record<string, never>; Returns: Json };
+      production_action: { Args: {p_id: string; p_action: string; p_data: Json}; Returns: undefined };
     }
     Enums: {
       activity_type:
@@ -912,7 +917,7 @@ export type Database = {
         | "stage_change"
         | "task"
         | "payment"
-      app_role: "admin" | "setter" | "closer"
+      app_role: "admin" | "setter" | "closer" | "technical_partner"
       task_priority: "low" | "medium" | "high" | "urgent"
     }
     CompositeTypes: {
@@ -1051,7 +1056,7 @@ export const Constants = {
         "task",
         "payment",
       ],
-      app_role: ["admin", "setter", "closer"],
+      app_role: ["admin", "setter", "closer", "technical_partner"],
       task_priority: ["low", "medium", "high", "urgent"],
     },
   },

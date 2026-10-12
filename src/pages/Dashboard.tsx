@@ -11,8 +11,9 @@ import ClientsSection from "@/sections/ClientsSection";
 import NotificationsBell from "@/components/NotificationsBell";
 import ReportsSection from "@/sections/ReportsSection";
 import FinanceSection from "@/sections/FinanceSection";
+import ProductionSection from "@/sections/ProductionSection";
 
-export type Section = "home" | "leads" | "clients" | "team" | "reports" | "finance" | "tools" | "settings";
+export type Section = "home" | "leads" | "clients" | "team" | "reports" | "finance" | "tools" | "settings" | "production";
 
 export default function Dashboard() {
   const [section, setSection] = useState<Section>("home");
@@ -26,11 +27,16 @@ export default function Dashboard() {
       {id:"home" as Section,icon:LayoutDashboard,label:"Dashboard"},
       {id:"leads" as Section,icon:Users,label:"Leads"},
       {id:"clients" as Section,icon:ContactRound,label:"Clientes"},
+      {id:"production" as Section,icon:Wrench,label:"Producción"},
       {id:"team" as Section,icon:UserSquare2,label:"Equipo"},
       {id:"reports" as Section,icon:BarChart3,label:"Reportes"},
       {id:"finance" as Section,icon:CircleDollarSign,label:"Finanzas"},
       {id:"tools" as Section,icon:Wrench,label:"Herramientas"},
       {id:"settings" as Section,icon:Settings,label:"Configuración"}
+    ];
+    if (profile.role === "technical_partner") return [
+      {id:"home" as Section,icon:LayoutDashboard,label:"Mi operación"},
+      {id:"production" as Section,icon:Wrench,label:"Mis proyectos"},
     ];
     if (profile.role === "setter") return [
       {id:"home" as Section,icon:LayoutDashboard,label:"Mi rendimiento"},
@@ -59,7 +65,8 @@ export default function Dashboard() {
   if (isLoading) return <div className="min-h-screen crm-shell grid place-items-center"><div className="w-5 h-5 border-2 border-[#2f80ed] border-t-transparent rounded-full animate-spin"/></div>;
   if (error || !profile) return <div className="min-h-screen crm-shell grid place-items-center text-sm text-red-400">No se pudo cargar tu perfil de acceso.</div>;
 
-  const roleLabel=profile.role==="admin"?"Administrador":profile.role==="closer"?"Closer":"Setter";
+  const roleLabel=profile.role==="admin"?"Administrador":profile.role==="technical_partner"?"Socio técnico":profile.role==="closer"?"Closer":"Setter";
+  const allowedSection=nav.some(item=>item.id===section)?section:"home";
   const initials=profile.full_name.split(" ").map(p=>p[0]).join("").slice(0,2).toUpperCase();
 
   return <div className="crm-shell flex h-screen overflow-hidden">
@@ -123,14 +130,15 @@ export default function Dashboard() {
       </header>
 
       <main className="flex-1 overflow-y-auto">
-        {section==="home"&&<DashboardHome onNavigate={setSection}/>}
-        {section==="leads"&&<LeadsSection/>}
-        {section==="clients"&&<ClientsSection/>}
-        {section==="team"&&profile.role==="admin"&&<TeamSection/>}
-        {section==="reports"&&profile.role==="admin"&&<ReportsSection/>}
-        {section==="finance"&&<FinanceSection/>}
-        {section==="tools"&&<ToolsSection/>}
-        {section==="settings"&&<SettingsSection userEmail={profile.email}/>}
+        {allowedSection==="home"&&(profile.role==="technical_partner"?<ProductionSection dashboard/>:<DashboardHome onNavigate={setSection}/>)}
+        {allowedSection==="production"&&<ProductionSection/>}
+        {allowedSection==="leads"&&<LeadsSection/>}
+        {allowedSection==="clients"&&<ClientsSection/>}
+        {allowedSection==="team"&&profile.role==="admin"&&<TeamSection/>}
+        {allowedSection==="reports"&&profile.role==="admin"&&<ReportsSection/>}
+        {allowedSection==="finance"&&<FinanceSection/>}
+        {allowedSection==="tools"&&<ToolsSection/>}
+        {allowedSection==="settings"&&<SettingsSection userEmail={profile.email}/>}
       </main>
     </div>
   </div>;

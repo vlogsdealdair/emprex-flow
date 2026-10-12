@@ -52,6 +52,7 @@ export async function fetchCurrentProfile(): Promise<Profile> {
     .single();
 
   if (error) throw error;
+  if (!data.is_active) throw new Error("Tu acceso está desactivado.");
   return data;
 }
 
@@ -318,7 +319,7 @@ export async function updateService(id: string, patch: { name?: string; descript
 }
 
 
-export async function updateProfile(id: string, patch: { role?: "admin" | "setter" | "closer"; is_active?: boolean; full_name?: string }): Promise<void> {
+export async function updateProfile(id: string, patch: { role?: "admin" | "setter" | "closer" | "technical_partner"; is_active?: boolean; full_name?: string }): Promise<void> {
   const { error } = await supabase.from("profiles").update(patch).eq("id", id);
   if (error) throw error;
 }

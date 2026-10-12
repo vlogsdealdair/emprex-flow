@@ -183,3 +183,5 @@ body {
 :root[data-theme="dark"] .bg-slate-800 { background-color: #0c2340 !important; }
 :root[data-theme="dark"] .border-slate-800,
 :root[data-theme="dark"] .border-slate-700 { border-color: rgba(93,169,255,.13) !important; }
+.production-button { color: white !important; }
+:root[data-theme="light"] .crm-sidebar .text-white { color: white !important; }
