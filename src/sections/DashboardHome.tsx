@@ -2,6 +2,7 @@ import { ArrowRight, CalendarCheck2, CheckCircle2, CircleDollarSign, Target, Tre
 import { useCommissions, useCurrentProfile, useDeals } from "@/hooks/useCrm";
 import { formatCurrency } from "@/utils/formatters";
 import type { Section } from "@/pages/Dashboard";
+import { ProspectionSummary } from '@/sections/ProspectionSection';
 
 interface Props { onNavigate: (s: Section) => void; }
 
@@ -61,6 +62,7 @@ export default function DashboardHome({ onNavigate }: Props) {
       {kpis.map(([label,value,sub,icon])=><Kpi key={String(label)} label={String(label)} value={String(value)} sub={String(sub)} icon={icon as React.ReactNode} loading={isLoading}/>)}
     </div>
 
+    {(admin||setter)&&<ProspectionSummary open={()=>onNavigate('prospection')}/>}
     <div className="grid xl:grid-cols-[1.65fr_.85fr] gap-5">
       <div className="crm-card p-5 md:p-6">
         <div className="mb-6"><h2 className="text-sm font-semibold crm-text">Rendimiento mensual</h2><p className="text-xs crm-muted mt-1">Leads creados y ventas cerradas en los últimos 6 meses.</p></div>
@@ -105,3 +107,4 @@ function SalesChart({deals}:{deals:any[]}) {
   const max=Math.max(1,...data.flatMap(d=>[d.leads,d.won])); const pts=(key:"leads"|"won")=>data.map((d,i)=>String(i*20)+","+String(88-(d[key]/max)*68)).join(" ");
   return <div><svg viewBox="0 0 100 96" className="w-full h-64" preserveAspectRatio="none">{[20,37,54,71,88].map(y=><line key={y} x1="0" x2="100" y1={y} y2={y} stroke="var(--crm-border)" strokeWidth=".45"/>)}<polyline fill="none" stroke="var(--crm-accent)" strokeWidth="1.8" vectorEffect="non-scaling-stroke" points={pts("leads")}/><polyline fill="none" stroke="var(--crm-accent-hover)" strokeOpacity=".45" strokeWidth="1.4" vectorEffect="non-scaling-stroke" points={pts("won")}/></svg><div className="grid grid-cols-6 mt-2">{data.map(d=><span key={d.label} className="text-center text-[10px] crm-muted capitalize">{d.label}</span>)}</div></div>;
 }
+
