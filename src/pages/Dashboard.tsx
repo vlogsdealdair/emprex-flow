@@ -12,8 +12,9 @@ import NotificationsBell from "@/components/NotificationsBell";
 import ReportsSection from "@/sections/ReportsSection";
 import FinanceSection from "@/sections/FinanceSection";
 import ProductionSection from "@/sections/ProductionSection";
+import ProspectionSection from "@/sections/ProspectionSection";
 
-export type Section = "home" | "leads" | "clients" | "team" | "reports" | "finance" | "tools" | "settings" | "production";
+export type Section = "home" | "leads" | "clients" | "team" | "reports" | "finance" | "tools" | "settings" | "production" | "prospection";
 
 export default function Dashboard() {
   const [section, setSection] = useState<Section>("home");
@@ -25,6 +26,7 @@ export default function Dashboard() {
     if (!profile) return [];
     if (profile.role === "admin") return [
       {id:"home" as Section,icon:LayoutDashboard,label:"Dashboard"},
+      {id:"prospection" as Section,icon:Search,label:"Prospección"},
       {id:"leads" as Section,icon:Users,label:"Leads"},
       {id:"clients" as Section,icon:ContactRound,label:"Clientes"},
       {id:"production" as Section,icon:Wrench,label:"Producción"},
@@ -40,6 +42,7 @@ export default function Dashboard() {
     ];
     if (profile.role === "setter") return [
       {id:"home" as Section,icon:LayoutDashboard,label:"Mi rendimiento"},
+      {id:"prospection" as Section,icon:Search,label:"Prospección"},
       {id:"leads" as Section,icon:Users,label:"Mis leads"},
       {id:"finance" as Section,icon:CircleDollarSign,label:"Mis comisiones"},
       {id:"tools" as Section,icon:Wrench,label:"Herramientas"},
@@ -132,6 +135,7 @@ export default function Dashboard() {
       <main className="flex-1 overflow-y-auto">
         {allowedSection==="home"&&(profile.role==="technical_partner"?<ProductionSection dashboard/>:<DashboardHome onNavigate={setSection}/>)}
         {allowedSection==="production"&&<ProductionSection/>}
+        {allowedSection==="prospection"&&['admin','setter'].includes(profile.role)&&<ProspectionSection/>}
         {allowedSection==="leads"&&<LeadsSection/>}
         {allowedSection==="clients"&&<ClientsSection/>}
         {allowedSection==="team"&&profile.role==="admin"&&<TeamSection/>}

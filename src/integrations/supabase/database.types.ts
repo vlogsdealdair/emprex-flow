@@ -904,6 +904,8 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      prospection_workspace: { Args: Record<string, never>; Returns: Json };
+      prospection_action: { Args: {p_id: string|null; p_action: string; p_data: Json}; Returns: Json };
       delete_unused_client: { Args: {p_client_id: string}; Returns: undefined };
       production_list: { Args: Record<string, never>; Returns: Json };
       production_action: { Args: {p_id: string; p_action: string; p_data: Json}; Returns: undefined };
